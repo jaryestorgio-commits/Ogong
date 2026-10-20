@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Products - OGONG Hardware</title>
+
+  <link rel="stylesheet" href="css/styles.css">
+
+  <style>
+    .products-page { background: #f7f9fc; }
+    .products-page .header { align-items: center; margin-bottom: 22px; }
+    .products-page .header h2 { margin: 0 0 6px; color: #102a43; font-size: 28px; }
+    .products-page .header p { margin: 0; color: #708198; font-size: 13px; }
+    .products-title { display: flex; align-items: center; gap: 13px; }
+    .products-title-icon { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; color: #1769e0; background: #edf5ff; border-radius: 10px; }
+    .products-title-icon svg { width: 22px; height: 22px; }
+    .products-page .button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 7px; font-size: 12px; font-weight: 700; }
+    .products-page .button-primary { background: #1769e0; box-shadow: 0 4px 10px rgba(23,105,224,.16); }
+    .products-page .button-primary:hover { background: #1058c4; }
+    .products-page .button-secondary { color: #31516e; background: #f4f8fd; border: 1px solid #e2eaf3; }
+    .products-page .button-secondary:hover { background: #eaf2fc; }
+    .product-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .product-summary-card { position: relative; min-width: 0; min-height: 112px; padding: 16px; overflow: hidden; background: #fff; border: 1px solid #e4eaf1; border-radius: 10px; box-shadow: 0 5px 16px rgba(16,42,67,.045); }
+    .product-summary-card h3 { margin: 0; color: #73849a; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+    .product-summary-card p { margin: 13px 0 0; color: #102a43; font-size: 23px; font-weight: 800; }
+    .product-summary-card::after { position: absolute; top: 16px; right: 16px; width: 8px; height: 8px; content: ''; background: #8bb4ed; border-radius: 50%; }
+    .product-summary-card.is-good p { color: #059669; }
+    .product-summary-card.is-good::after { background: #10b981; }
+    .product-summary-card.is-warning p { color: #d97706; }
+    .product-summary-card.is-warning::after { background: #f59e0b; }
+    .product-summary-card.is-danger p { color: #dc2626; }
+    .product-summary-card.is-danger::after { background: #ef4444; }
+    .product-toolbar { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; padding: 14px; margin-bottom: 13px; background: #fff; border: 1px solid #e4eaf1; border-radius: 10px; box-shadow: 0 4px 14px rgba(16,42,67,.035); }
+    .product-toolbar .search-input { flex: 1 1 210px; min-width: 190px; }
+    .product-toolbar select { flex: 0 1 165px; min-width: 150px; }
+    .product-toolbar input, .product-toolbar select { height: 39px; padding: 8px 11px; color: #183653; border-color: #e1e8f0; border-radius: 7px; font-size: 12px; }
+    .product-toolbar input::placeholder { color: #98a7b8; }
+    .products-table-card { padding: 0; overflow: hidden; border-radius: 10px; box-shadow: 0 6px 18px rgba(16,42,67,.045); }
+    .products-table-card .table-responsive { overflow-x: auto; }
+    .products-table { min-width: 830px; border-collapse: collapse; }
+    .products-table thead { background: #f8fafc; }
+    .products-table th { padding: 12px 14px; color: #8a9bb0; font-size: 9px; font-weight: 800; text-transform: uppercase; white-space: nowrap; }
+    .products-table td { padding: 12px 14px; color: #61758a; border-bottom: 1px solid #edf2f7; font-size: 11px; vertical-align: middle; }
+    .products-table tbody tr:last-child td { border-bottom: 0; }
+    .products-table tbody tr:hover { background: #f9fbfe; }
+    .products-table th:nth-child(1), .products-table td:nth-child(1) { width: 36%; }
+    .products-table th:nth-child(4), .products-table td:nth-child(4), .products-table th:nth-child(7), .products-table td:nth-child(7) { text-align: right; }
+    .product-name-cell { display: flex; align-items: center; gap: 10px; min-width: 180px; }
+    .product-row-icon { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 34px; color: #1769e0; background: #edf5ff; border-radius: 8px; }
+    .product-row-icon svg { width: 17px; height: 17px; }
+    .product-name-copy strong { display: block; color: #183653; font-size: 11px; }
+    .product-name-copy span { display: block; margin-top: 3px; color: #9aa8b8; font-size: 9px; }
+    .price-value { color: #183653; font-weight: 800; white-space: nowrap; }
+    .stock-detail { display: block; margin-top: 3px; color: #98a7b8; font-size: 9px; white-space: nowrap; }
+    .stock-badge { display: inline-flex; align-items: center; padding: 5px 8px; border-radius: 999px; font-size: 9px; font-weight: 800; white-space: nowrap; }
+    .stock-good { color: #087f5b; background: #eafaf2; }
+    .stock-low { color: #a15c00; background: #fff6e5; }
+    .stock-out { color: #b42318; background: #fff0ef; }
+    .stock-number { color: #183653; font-weight: 800; }
+    .stock-number.low { color: #b45309; }
+    .stock-number.out { color: #b91c1c; }
+    .product-actions { display: flex; justify-content: flex-end; gap: 5px; }
+    .product-action { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; color: #57718d; background: #fff; border: 1px solid #e5ebf2; border-radius: 7px; cursor: pointer; transition: .16s ease; }
+    .product-action svg { width: 14px; height: 14px; }
+    .product-action:hover { color: #1769e0; background: #edf5ff; border-color: #cfe1f9; }
+    .product-action.delete:hover { color: #c62828; background: #fff0ef; border-color: #f5d3d0; }
+    .empty-products, .loading-products { display: grid; place-items: center; min-height: 148px; padding: 24px; color: #8293a7; font-size: 12px; text-align: center; }
+    .empty-products strong { display: block; margin-bottom: 5px; color: #183653; font-size: 13px; }
+    .products-page .modal-content { width: min(680px, 95vw); max-height: calc(100vh - 36px); padding: 23px; border-radius: 12px; }
+    .products-page .modal-header { padding-bottom: 14px; border-bottom: 1px solid #edf2f7; }
+    .products-page .modal-header h2 { color: #102a43; font-size: 18px; }
+    .products-page .modal-close { width: 32px; height: 32px; color: #6b7f93; background: #f4f7fa; border-radius: 7px; }
+    .product-form-section { padding: 14px 0 2px; }
+    .product-form-section + .product-form-section { border-top: 1px solid #edf2f7; }
+    .product-form-section h3 { margin: 0 0 12px; color: #183653; font-size: 12px; }
+    .product-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 13px; }
+    .product-form-grid .form-group { margin-bottom: 12px; }
+    .products-page .form-group label { color: #52677d; font-size: 11px; font-weight: 700; }
+    .products-page .form-group input, .products-page .form-group select { height: 39px; padding: 8px 10px; border-color: #dfe7f0; border-radius: 7px; font-size: 12px; }
+    .products-page .form-group input:focus, .products-page .form-group select:focus { border-color: #75a9ed; box-shadow: 0 0 0 3px #edf5ff; }
+    .products-page .form-help { color: #8999aa; font-size: 10px; }
+    .required { color: #dc2626; }
+    .products-page .modal-actions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 14px; margin-top: 6px; border-top: 1px solid #edf2f7; }
+    @media (max-width: 950px) { .product-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 600px) {
+      .products-page { padding: 18px 14px; }
+      .products-page .header { align-items: flex-start; gap: 14px; }
+      .products-page .header h2 { font-size: 23px; }
+      .products-page .header > .button { flex: 0 0 auto; padding: 9px 10px; }
+      .products-title { align-items: flex-start; gap: 9px; }
+      .products-title-icon { width: 37px; height: 37px; flex-basis: 37px; }
+      .product-summary { gap: 9px; }
+      .product-summary-card { min-height: 94px; padding: 13px; }
+      .product-summary-card p { margin-top: 10px; font-size: 20px; }
+      .product-toolbar { align-items: stretch; padding: 11px; }
+      .product-toolbar .search-input, .product-toolbar select { flex: 1 1 100%; width: 100%; min-width: 0; }
+      .product-toolbar .button { flex: 1; }
+      .product-form-grid { grid-template-columns: 1fr; gap: 0; }
+      .products-page .modal-content { padding: 18px; }
+    }
+    @media (max-width: 380px) { .product-summary { grid-template-columns: 1fr; } }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+ <aside class="sidebar">
+
+      <div class="dashboard-logo">
+
+        <div class="dashboard-logo-mark">
+          OG
+        </div>
+          
+        <div class="dashboard-logo-text">
+          <strong>OGONG HARDWARE</strong>
+          <span>BUILT TOGETHER</span>
+        </div>
+
+      </div>
+
+      <div id="sidebar-nav"></div>
+
+    </aside>
+
+  <main class="main products-page">
+
+
+
+    <div class="header">
+
+      <div class="products-title">
+        <span class="products-title-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.5 7.5 7.5 4 7.5-4M12 12v9"/></svg>
+        </span>
+        <div>
+        <h2>Products</h2>
+        <p>Manage your product catalog, pricing, and inventory levels.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="alert-container"></div>
+
+
+    <div class="product-summary">
+
+      <div class="product-summary-card">
+        <h3>Total Products</h3>
+        <p id="summary-total">0</p>
+      </div>
+
+      <div class="product-summary-card is-good">
+        <h3>In Stock</h3>
+        <p id="summary-in-stock">0</p>
+      </div>
+
+      <div class="product-summary-card is-warning">
+        <h3>Low Stock</h3>
+        <p id="summary-low-stock">0</p>
+      </div>
+
+      <div class="product-summary-card is-danger">
+        <h3>Out of Stock</h3>
+        <p id="summary-out-stock">0</p>
+      </div>
+
+    </div>
+
+    <div class="product-toolbar">
+
+        <input
+          class="search-input"
+          id="product-search"
+          type="text"
+          placeholder="Search products..."
+          aria-label="Search products"
+        >
+
+        <select
+          class="search-input"
+          id="product-category-filter"
+          aria-label="Filter by category"
+        >
+          <option value="">All Categories</option>
+        </select>
+
+        <select
+          class="search-input"
+          id="product-supplier-filter"
+          aria-label="Filter by supplier"
+        >
+          <option value="">All Suppliers</option>
+        </select>
+
+        <select
+          class="search-input"
+          id="product-stock-filter"
+          aria-label="Filter by stock status"
+        >
+          <option value="">All Stock Status</option>
+          <option value="in-stock">In Stock</option>
+          <option value="low-stock">Low Stock</option>
+          <option value="out-of-stock">Out of Stock</option>
+        </select>
+
+        <button class="button button-secondary" id="product-clear-filters-btn" type="button">
+          Clear filters
+        </button>
+
+        <button
+          class="button button-secondary"
+          id="product-refresh-btn"
+          type="button"
+        >
+          Refresh
+        </button>
+
+        <button class="button button-primary" id="toolbar-add-product-btn" type="button">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Add Product
+        </button>
+
+    </div>
+
+    <div class="table-card products-table-card">
+
+      <div class="table-responsive">
+
+        <table class="products-table">
+
+          <thead>
+
+            <tr>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Supplier</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+
+          </thead>
+
+          <tbody id="products-table-body">
+
+            <tr>
+              <td colspan="7">
+                <div class="loading-products">
+                  Loading products...
+                </div>
+              </td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+<div
+  class="modal"
+  id="product-modal"
+>
+
+  <div class="modal-content">
+
+    <div class="modal-header">
+
+      <h2 id="product-modal-title">
+        Add Product
+      </h2>
+
+      <button
+        class="modal-close"
+        type="button"
+        onclick="closeModal('product-modal')"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div id="product-modal-alert"></div>
+
+    <section class="product-form-section">
+      <h3>Product information</h3>
+      <div class="product-form-grid">
+    <div class="form-group">
+
+      <label for="product-name">
+        Product Name <span class="required">*</span>
+      </label>
+
+      <input
+        id="product-name"
+        type="text"
+        placeholder="Example: Portland Cement 40kg"
+        maxlength="150"
+      >
+
+    </div>
+
+    <div class="form-group">
+
+      <label for="product-category">
+        Category <span class="required">*</span>
+      </label>
+
+      <select id="product-category">
+
+        <option value="">
+          Select category
+        </option>
+
+      </select>
+
+    </div>
+      </div>
+    </section>
+
+    <section class="product-form-section">
+      <h3>Pricing</h3>
+      <div class="product-form-grid">
+    <div class="form-group">
+
+      <label for="product-supplier">
+        Supplier <span class="required">*</span>
+      </label>
+
+      <select id="product-supplier">
+
+        <option value="">
+          Select supplier
+        </option>
+
+      </select>
+
+    </div>
+
+    <div class="form-group">
+      <label for="product-cost">Cost <span class="required">*</span></label>
+      <input id="product-cost" type="number" min="0" step="0.01" placeholder="0.00">
+      <small class="form-help">Enter the unit cost in Philippine pesos.</small>
+    </div>
+      </div>
+    </section>
+
+    <section class="product-form-section">
+      <h3>Inventory</h3>
+      <div class="product-form-grid">
+    <div class="form-group">
+
+      <label for="product-price">
+        Selling Price <span class="required">*</span>
+      </label>
+
+      <input
+        id="product-price"
+        type="number"
+        min="0"
+        step="0.01"
+        placeholder="0.00"
+      >
+
+      <small class="form-help">
+        Enter the selling price in Philippine pesos.
+      </small>
+
+    </div>
+
+    <div class="form-group">
+
+      <label for="product-stock">
+        Stock Quantity <span class="required">*</span>
+      </label>
+
+      <input
+        id="product-stock"
+        type="number"
+        min="0"
+        step="1"
+        placeholder="0"
+      >
+
+      <small class="form-help">
+        Use 0 when the product is currently out of stock.
+      </small>
+
+    </div>
+
+    <div class="form-group">
+
+      <label for="product-reorder">
+        Reorder Level <span class="required">*</span>
+      </label>
+
+      <input
+        id="product-reorder"
+        type="number"
+        min="0"
+        step="1"
+        placeholder="Example: 10"
+      >
+
+      <small class="form-help">
+        The stock level at which the product should be reordered.
+      </small>
+
+    </div>
+      </div>
+    </section>
+
+    <div class="modal-actions">
+
+      <button
+        class="button button-primary"
+        id="save-product-btn"
+        type="button"
+      >
+        Save Product
+      </button>
+
+      <button
+        class="button button-secondary"
+        type="button"
+        onclick="closeModal('product-modal')"
+      >
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="js/app.js"></script>
+
+<script>
+
+  let products = [];
+  let categories = [];
+  let suppliers = [];
+  let editingProductId = null;
+
+
+ 
+
+  const user = requireAuth();
+
+  if (!user) {
+
+    window.location.href = 'login.html';
+
+  } else {
+
+    renderSidebar('products');
+
+  }
+
+
+
+        setupModalClose('product-modal');
+
+            async function loadCategories() {
+
+    try {
+
+          categories = await apiFetch('/categories');
+
+              const productSelect =
+                document.getElementById('product-category');
+
+                   const filterSelect =
+                      document.getElementById('product-category-filter');
+
+
+      productSelect.innerHTML =
+        '<option value="">Select category</option>';
+
+      filterSelect.innerHTML =
+        '<option value="">All Categories</option>';
+
+
+      categories.forEach(category => {
+
+        productSelect.appendChild(
+          createOption(
+            category.id,
+            category.category_name
+          )
+        );
+
+
+        filterSelect.appendChild(
+          createOption(
+            category.category_name,
+            category.category_name
+          )
+        );
+
+      });
+
+    } catch (error) {
+
+      showAlert(
+        'Unable to load categories.',
+        'danger'
+      );
+
+    }
+
+  }
+
+  async function loadSuppliers() {
+
+    try {
+
+      suppliers = await apiFetch('/suppliers');
+
+      const productSelect =
+        document.getElementById('product-supplier');
+
+      const filterSelect =
+        document.getElementById('product-supplier-filter');
+
+
+      productSelect.innerHTML =
+        '<option value="">Select supplier</option>';
+
+      filterSelect.innerHTML =
+        '<option value="">All Suppliers</option>';
+
+
+      suppliers.forEach(supplier => {
+
+        productSelect.appendChild(
+          createOption(
+            supplier.id,
+            supplier.supplier_name
+          )
+        );
+
+
+        filterSelect.appendChild(
+          createOption(
+            supplier.supplier_name,
+            supplier.supplier_name
+          )
+        );
+
+      });
+
+    } catch (error) {
+
+      showAlert(
+        'Unable to load suppliers.',
+        'danger'
+      );
+
+    }
+
+  }
+
+  function getStockStatus(product) {
+
+    const stock =
+      Number(product.stock_quantity) || 0;
+
+    const reorder =
+      Number(product.reorder_level) || 0;
+
+
+    if (stock <= 0) {
+
+      return {
+        key: 'out-of-stock',
+        label: 'Out of Stock',
+        className: 'stock-out'
+      };
+
+    }
+
+
+    if (stock <= reorder) {
+
+      return {
+        key: 'low-stock',
+        label: 'Low Stock',
+        className: 'stock-low'
+      };
+
+    }
+
+
+    return {
+      key: 'in-stock',
+      label: 'In Stock',
+      className: 'stock-good'
+    };
+
+  }
+
+  function updateSummary(list) {
+
+    let inStock = 0;
+    let lowStock = 0;
+    let outOfStock = 0;
+
+
+    list.forEach(product => {
+
+      const status =
+        getStockStatus(product).key;
+
+
+      if (status === 'in-stock') {
+
+        inStock++;
+
+      } else if (status === 'low-stock') {
+
+        lowStock++;
+
+      } else {
+
+        outOfStock++;
+
+      }
+
+    });
+
+
+    document.getElementById(
+      'summary-total'
+    ).textContent = list.length;
+
+
+    document.getElementById(
+      'summary-in-stock'
+    ).textContent = inStock;
+
+
+    document.getElementById(
+      'summary-low-stock'
+    ).textContent = lowStock;
+
+
+    document.getElementById(
+      'summary-out-stock'
+    ).textContent = outOfStock;
+
+  }
+
+  async function loadProducts() {
+
+    const tbody =
+      document.getElementById(
+        'products-table-body'
+      );
+
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7">
+          <div class="loading-products">
+            Loading products...
+          </div>
+        </td>
+      </tr>
+    `;
+
+
+    try {
+
+      products = await apiFetch('/products');
+
+      renderProducts();
+
+    } catch (error) {
+
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7">
+            <div class="empty-products">
+              <div><strong>Products could not be loaded</strong><span>Check your connection and try again.</span><p><button class="button button-secondary" type="button" onclick="loadProducts()">Try again</button></p></div>
+            </div>
+          </td>
+        </tr>
+      `;
+
+
+      showAlert(
+        error.message,
+        'danger'
+      );
+
+    }
+
+  }
+
+  function getFilteredProducts() {
+
+    const search =
+      document.getElementById(
+        'product-search'
+      ).value
+        .trim()
+        .toLowerCase();
+
+
+    const category =
+      document.getElementById(
+        'product-category-filter'
+      ).value;
+
+
+    const supplier =
+      document.getElementById(
+        'product-supplier-filter'
+      ).value;
+
+
+    const stockStatus =
+      document.getElementById(
+        'product-stock-filter'
+      ).value;
+
+
+    return products.filter(product => {
+
+      const name =
+        String(
+          product.product_name || ''
+        ).toLowerCase();
+
+
+      const matchesSearch =
+        !search ||
+        name.includes(search);
+
+
+      const matchesCategory =
+        !category ||
+        product.category_name === category;
+
+
+      const matchesSupplier =
+        !supplier ||
+        product.supplier_name === supplier;
+
+
+      const matchesStock =
+        !stockStatus ||
+        getStockStatus(product).key === stockStatus;
+
+
+      return (
+        matchesSearch &&
+        matchesCategory &&
+        matchesSupplier &&
+        matchesStock
+      );
+
+    });
+
+  }
+
+  function renderProducts() {
+
+    const tbody =
+      document.getElementById(
+        'products-table-body'
+      );
+
+
+    const filtered =
+      getFilteredProducts();
+
+
+    updateSummary(products);
+
+
+    if (!filtered.length) {
+
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7">
+            <div class="empty-products">
+              <div><strong>${products.length ? 'No matching products' : 'No products yet'}</strong><span>${products.length ? 'Try changing your search or filters.' : 'Add a product to start building your inventory.'}</span></div>
+            </div>
+          </td>
+        </tr>
+      `;
+
+      return;
+
+    }
+
+
+    tbody.innerHTML = '';
+
+
+    filtered.forEach(product => {
+
+      const row =
+        document.createElement('tr');
+
+
+      const status =
+        getStockStatus(product);
+
+
+      const stock =
+        Number(product.stock_quantity) || 0;
+
+
+      const reorder =
+        Number(product.reorder_level) || 0;
+
+
+      let stockClass = '';
+
+
+      if (stock <= 0) {
+
+        stockClass = 'out';
+
+      } else if (stock <= reorder) {
+
+        stockClass = 'low';
+
+      }
+
+
+      const createdDate =
+        product.created_at
+          ? new Date(
+              product.created_at
+            ).toLocaleDateString()
+          : '—';
+
+
+      row.innerHTML = `
+
+        <td>
+          <div class="product-name-cell">
+            <span class="product-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.5 7.5 7.5 4 7.5-4M12 12v9"/></svg></span>
+            <span class="product-name-copy"><strong>${escapeHtml(product.product_name)}</strong><span>ID #${escapeHtml(product.id)}${createdDate ? ` · Added ${escapeHtml(createdDate)}` : ''}</span></span>
+          </div>
+        </td>
+
+
+        <td>
+          ${escapeHtml(
+            product.category_name || '—'
+          )}
+        </td>
+
+
+        <td>
+          ${escapeHtml(
+            product.supplier_name || '—'
+          )}
+        </td>
+
+
+        <td>
+          ${formatCurrency(
+            product.price
+          )}
+        </td>
+
+
+        <td>
+
+          <span class="stock-number ${stockClass}">${stock}</span>
+          <span class="stock-detail">Reorder at ${reorder}</span>
+        </td>
+
+
+        <td>
+
+          <span
+            class="stock-badge ${status.className}"
+          >
+            ${status.label}
+          </span>
+
+        </td>
+
+
+        <td>
+          ${reorder}
+        </td>
+
+
+        <td>
+          ${createdDate}
+        </td>
+
+
+        <td>
+
+          <div class="product-actions">
+            <button class="product-action" type="button" title="Edit product" aria-label="Edit ${escapeHtml(product.product_name)}" onclick="editProduct(${product.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button>
+            <button class="product-action delete" type="button" title="Delete product" aria-label="Delete ${escapeHtml(product.product_name)}" onclick="deleteProduct(${product.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6"/></svg></button>
+          </div>
+
+        </td>
+
+      `;
+
+
+      tbody.appendChild(row);
+
+    });
+
+  }
+
+  function escapeHtml(value) {
+
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
+  }
+
+
+  /* =========================
+     OPEN ADD MODAL
+     ========================= */
+
+  function openAddProductModal() {
+
+    editingProductId = null;
+
+
+    document.getElementById(
+      'product-modal-title'
+    ).textContent = 'Add Product';
+
+
+    document.getElementById(
+      'product-modal-alert'
+    ).innerHTML = '';
+
+
+    document.getElementById(
+      'product-name'
+    ).value = '';
+
+
+    document.getElementById(
+      'product-category'
+    ).value = '';
+
+
+    document.getElementById(
+      'product-supplier'
+    ).value = '';
+
+
+    document.getElementById(
+      'product-price'
+    ).value = '';
+
+    document.getElementById(
+      'product-cost'
+    ).value = '';
+
+
+    document.getElementById(
+      'product-stock'
+    ).value = '';
+
+
+    document.getElementById(
+      'product-reorder'
+    ).value = '';
+
+
+    openModal('product-modal');
+
+  }
+
+
+  async function editProduct(productId) {
+
+    try {
+
+      const product =
+        await apiFetch(
+          `/products/${productId}`
+        );
+
+
+      editingProductId =
+        product.id;
+
+
+      document.getElementById(
+        'product-modal-title'
+      ).textContent = 'Edit Product';
+
+
+      document.getElementById(
+        'product-modal-alert'
+      ).innerHTML = '';
+
+
+      document.getElementById(
+        'product-name'
+      ).value =
+        product.product_name || '';
+
+
+      document.getElementById(
+        'product-category'
+      ).value =
+        product.category_id || '';
+
+
+      document.getElementById(
+        'product-supplier'
+      ).value =
+        product.supplier_id || '';
+
+
+      document.getElementById(
+        'product-price'
+      ).value =
+        product.price ?? '';
+
+      document.getElementById(
+        'product-cost'
+      ).value =
+        product.cost ?? '';
+
+
+      document.getElementById(
+        'product-stock'
+      ).value =
+        product.stock_quantity ?? '';
+
+
+      document.getElementById(
+        'product-reorder'
+      ).value =
+        product.reorder_level ?? '';
+
+
+      openModal('product-modal');
+
+    } catch (error) {
+
+      showAlert(
+        error.message,
+        'danger'
+      );
+
+    }
+
+  }
+
+  async function deleteProduct(productId) {
+
+    const product =
+      products.find(
+        p => Number(p.id) === Number(productId)
+      );
+
+
+    const productName =
+      product?.product_name ||
+      `Product #${productId}`;
+
+
+    const confirmed =
+      confirm(
+        `Delete "${productName}"?\n\n` +
+        `This action cannot be undone.`
+      );
+
+
+    if (!confirmed) return;
+
+
+    try {
+
+      await apiFetch(
+        `/products/${productId}`,
+        {
+          method: 'DELETE'
+        }
+      );
+
+
+      showAlert(
+        'Product deleted successfully.',
+        'success'
+      );
+
+
+      await loadProducts();
+
+    } catch (error) {
+
+      showAlert(
+        error.message,
+        'danger'
+      );
+
+    }
+
+  }
+
+  function validateProduct(product) {
+
+    if (!product.product_name) {
+
+      return 'Product name is required.';
+
+    }
+
+
+    if (!product.category_id) {
+
+      return 'Please select a category.';
+
+    }
+
+
+    if (!product.supplier_id) {
+
+      return 'Please select a supplier.';
+
+    }
+
+
+    if (
+      !Number.isFinite(product.price) ||
+      product.price < 0
+    ) {
+
+      return 'Price must be 0 or greater.';
+
+    }
+
+    if (
+      !Number.isFinite(product.cost) ||
+      product.cost < 0
+    ) {
+
+      return 'Cost must be 0 or greater.';
+
+    }
+
+
+    if (
+      !Number.isInteger(
+        product.stock_quantity
+      ) ||
+      product.stock_quantity < 0
+    ) {
+
+      return 'Stock quantity must be a whole number of 0 or greater.';
+
+    }
+
+
+    if (
+      !Number.isInteger(
+        product.reorder_level
+      ) ||
+      product.reorder_level < 0
+    ) {
+
+      return 'Reorder level must be a whole number of 0 or greater.';
+
+    }
+
+
+    return null;
+
+  }
+
+  async function saveProduct() {
+
+    const alertBox =
+      document.getElementById(
+        'product-modal-alert'
+      );
+
+
+    alertBox.innerHTML = '';
+
+
+    const product = {
+
+      product_name:
+        document.getElementById(
+          'product-name'
+        ).value.trim(),
+
+
+      category_id:
+        Number(
+          document.getElementById(
+            'product-category'
+          ).value
+        ),
+
+
+      supplier_id:
+        Number(
+          document.getElementById(
+            'product-supplier'
+          ).value
+        ),
+
+
+      price:
+        Number(
+          document.getElementById(
+            'product-price'
+          ).value
+        ),
+
+      cost:
+        Number(
+          document.getElementById(
+            'product-cost'
+          ).value
+        ),
+
+
+      stock_quantity:
+        Number(
+          document.getElementById(
+            'product-stock'
+          ).value
+        ),
+
+
+      reorder_level:
+        Number(
+          document.getElementById(
+            'product-reorder'
+          ).value
+        )
+
+    };
+
+
+    const validationError =
+      validateProduct(product);
+
+
+    if (validationError) {
+
+      alertBox.innerHTML = `
+        <div class="alert alert-danger">
+          ${escapeHtml(
+            validationError
+          )}
+        </div>
+      `;
+
+      return;
+
+    }
+
+
+    const saveButton =
+      document.getElementById(
+        'save-product-btn'
+      );
+
+
+    saveButton.disabled = true;
+    saveButton.textContent = 'Saving...';
+
+
+    try {
+
+      if (editingProductId) {
+
+        await apiFetch(
+          `/products/${editingProductId}`,
+          {
+            method: 'PUT',
+            body: JSON.stringify(product)
+          }
+        );
+
+
+        showAlert(
+          'Product updated successfully.',
+          'success'
+        );
+
+      } else {
+
+        await apiFetch(
+          '/products',
+          {
+            method: 'POST',
+            body: JSON.stringify(product)
+          }
+        );
+
+
+        showAlert(
+          'Product added successfully.',
+          'success'
+        );
+
+      }
+
+
+      closeModal('product-modal');
+
+
+      editingProductId = null;
+
+
+      await loadProducts();
+
+
+    } catch (error) {
+
+      alertBox.innerHTML = `
+        <div class="alert alert-danger">
+          ${escapeHtml(
+            error.message
+          )}
+        </div>
+      `;
+
+    } finally {
+
+      saveButton.disabled = false;
+      saveButton.textContent = 'Save Product';
+
+    }
+
+  }
+
+  document
+    .getElementById('toolbar-add-product-btn')
+    .addEventListener('click', openAddProductModal);
+
+  document
+    .getElementById('product-clear-filters-btn')
+    .addEventListener('click', () => {
+      document.getElementById('product-search').value = '';
+      document.getElementById('product-category-filter').value = '';
+      document.getElementById('product-supplier-filter').value = '';
+      document.getElementById('product-stock-filter').value = '';
+      renderProducts();
+    });
+
+
+  document
+    .getElementById(
+      'save-product-btn'
+    )
+    .addEventListener(
+      'click',
+      saveProduct
+    );
+
+
+  document
+    .getElementById(
+      'product-search'
+    )
+    .addEventListener(
+      'input',
+      renderProducts
+    );
+
+
+  document
+    .getElementById(
+      'product-category-filter'
+    )
+    .addEventListener(
+      'change',
+      renderProducts
+    );
+
+
+  document
+    .getElementById(
+      'product-supplier-filter'
+    )
+    .addEventListener(
+      'change',
+      renderProducts
+    );
+
+
+  document
+    .getElementById(
+      'product-stock-filter'
+    )
+    .addEventListener(
+      'change',
+      renderProducts
+    );
+
+
+  document
+    .getElementById(
+      'product-refresh-btn'
+    )
+    .addEventListener(
+      'click',
+      async () => {
+
+        await loadCategories();
+        await loadSuppliers();
+        await loadProducts();
+
+      }
+    );
+
+  document
+    .getElementById(
+      'product-name'
+    )
+    .addEventListener(
+      'keydown',
+      event => {
+
+        if (
+          event.key === 'Enter'
+        ) {
+
+          saveProduct();
+
+        }
+
+      }
+    );
+
+
+  async function initializeProductsPage() {
+
+    try {
+
+      await loadCategories();
+      await loadSuppliers();
+      await loadProducts();
+
+    } catch (error) {
+
+      showAlert(
+        error.message,
+        'danger'
+      );
+
+    }
+
+  }
+
+
+  initializeProductsPage();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Dashboard - OGONG HARDWARE</title>
+
+  <link rel="stylesheet" href="css/styles.css">
+
+  <style>
+    .dashboard-main { background: #f7f9fc; }
+    .dashboard-main .header-right { display: none; }
+    .dashboard-welcome { margin-bottom: 24px; }
+    .dashboard-welcome .header { margin-bottom: 0; }
+    .dashboard-welcome h2 { margin: 0 0 6px; color: #102a43; font-size: clamp(24px, 3vw, 32px); letter-spacing: -.03em; }
+    .dashboard-welcome p { margin: 0; color: #708198; font-size: 13px; }
+    .dashboard-status { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border: 1px solid #b9efd9; border-radius: 999px; color: #079669; background: #effdf7; font-size: 11px; font-weight: 800; letter-spacing: .04em; }
+    .dashboard-status::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 3px #d6f8e9; }
+    .dashboard-card-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin-bottom: 27px; }
+    .dashboard-stat { min-width: 0; min-height: 120px; padding: 16px 15px; background: #fff; border: 1px solid #e4eaf1; border-radius: 10px; box-shadow: 0 5px 16px rgba(16,42,67,.045); }
+    .dashboard-stat-label { color: #73849a; font-size: 10px; font-weight: 800; line-height: 1.3; text-transform: uppercase; letter-spacing: .03em; }
+    .dashboard-stat-value { margin-top: 12px; color: #102a43; font-size: 22px; font-weight: 800; letter-spacing: -.04em; white-space: nowrap; }
+    .dashboard-stat-note { margin-top: 7px; color: #9aa8b8; font-size: 10px; line-height: 1.25; }
+    .dashboard-stat.warning .dashboard-stat-value { color: #d97706; }
+    .dashboard-stat.success .dashboard-stat-value { color: #059669; }
+    .dashboard-section { margin-bottom: 25px; }
+    .dashboard-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 11px; }
+    .dashboard-section-header h3 { margin: 0; color: #102a43; font-size: 14px; }
+    .quick-actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 11px; }
+    .quick-action { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 13px; color: inherit; text-decoration: none; background: #fff; border: 1px solid #e4eaf1; border-radius: 9px; box-shadow: 0 4px 14px rgba(16,42,67,.035); transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+    .quick-action:hover { transform: translateY(-2px); border-color: #9fc1f3; box-shadow: 0 9px 20px rgba(16,42,67,.09); }
+    .quick-action-icon { display: grid; place-items: center; width: 31px; height: 31px; flex: 0 0 31px; color: #1769e0; background: #edf5ff; border-radius: 7px; font-size: 9px; font-weight: 800; }
+    .quick-action strong { display: block; margin-bottom: 3px; color: #183653; font-size: 11px; }
+    .quick-action span { display: block; overflow: hidden; color: #8a9bb0; font-size: 10px; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+    .dashboard-lower-grid { display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(300px, .92fr); gap: 15px; align-items: start; }
+    .dashboard-column { display: grid; gap: 15px; min-width: 0; }
+    .dashboard-panel { overflow: hidden; background: #fff; border: 1px solid #e4eaf1; border-radius: 11px; box-shadow: 0 6px 18px rgba(16,42,67,.045); }
+    .dashboard-panel-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 15px 17px 11px; }
+    .dashboard-panel-header h3 { margin: 0; color: #102a43; font-size: 13px; }
+    .dashboard-panel-subtitle { margin: 3px 0 0; color: #8a9bb0; font-size: 10px; }
+    .dashboard-panel-header .button { flex-shrink: 0; padding: 7px 10px; border-radius: 6px; color: #1769e0; background: #f4f8fd; font-size: 10px; }
+    .dashboard-panel-body { min-height: 110px; padding: 0 17px 13px; }
+    .dashboard-empty { display: grid; place-items: center; min-height: 125px; padding: 20px 10px; color: #94a3b8; font-size: 12px; text-align: center; }
+    .trend-meta { color: #8a9bb0; font-size: 10px; }
+    .trend-meta strong { margin-left: 5px; color: #059669; }
+    .trend-chart { display: flex; align-items: end; justify-content: space-around; gap: 12px; height: 152px; padding: 16px 8px 0; border-bottom: 1px solid #e9eff5; }
+    .trend-bar-wrap { display: flex; height: 100%; flex: 1; align-items: center; justify-content: end; gap: 6px; flex-direction: column; }
+    .trend-bar { width: min(48px, 75%); min-height: 4px; border-radius: 5px 5px 0 0; background: #2864e5; }
+    .trend-bar.today { background: #10b981; }
+    .trend-label { color: #72849a; font-size: 10px; }
+    .sales-table { width: 100%; border-collapse: collapse; }
+    .sales-table th { padding: 9px 8px 7px; color: #9aa8b8; font-size: 9px; font-weight: 800; text-align: left; text-transform: uppercase; }
+    .sales-table td { padding: 10px 8px; border-top: 1px solid #edf2f7; color: #53677e; font-size: 11px; }
+    .sales-table th:last-child, .sales-table td:last-child { text-align: right; }
+    .sales-table td:first-child { color: #183653; font-weight: 700; }
+    .sales-table .recent-sale-amount { color: #059669; font-weight: 800; }
+    .low-stock-item { padding: 10px 0; border-bottom: 1px solid #edf2f7; }
+    .low-stock-item:last-child { border-bottom: none; }
+    .low-stock-line { display: flex; justify-content: space-between; gap: 10px; color: #183653; font-size: 11px; font-weight: 700; }
+    .low-stock-category { margin-top: 3px; color: #8a9bb0; font-size: 10px; }
+    .low-stock-meter { height: 4px; margin-top: 7px; overflow: hidden; border-radius: 999px; background: #edf2f7; }
+    .low-stock-meter span { display: block; height: 100%; border-radius: inherit; background: #10b981; }
+    .low-stock-badge { color: #72849a; font-size: 10px; font-weight: 600; white-space: nowrap; }
+    .stock-health { padding: 11px 12px; margin-bottom: 3px; border-radius: 7px; color: #059669; background: #ecfdf5; font-size: 10px; }
+    .stock-health strong { display: block; margin-bottom: 3px; font-size: 11px; }
+    .donut-area { display: flex; align-items: center; gap: 18px; min-height: 130px; padding: 5px 10px 8px; }
+    .donut-chart { width: 105px; height: 105px; flex: 0 0 105px; }
+    .donut-label { fill: #183653; font-size: 15px; font-weight: 800; text-anchor: middle; }
+    .donut-caption { fill: #8a9bb0; font-size: 7px; text-anchor: middle; text-transform: uppercase; }
+    .volume-legend { display: grid; gap: 9px; min-width: 0; color: #66788a; font-size: 10px; }
+    .volume-legend span { display: flex; align-items: center; gap: 7px; }
+    .volume-legend i { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: #2864e5; }
+    .volume-legend i.green { background: #10b981; }
+    .volume-legend i.light { background: #8bb4ed; }
+    @media (max-width: 1150px) { .dashboard-card-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 900px) { .quick-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); } .dashboard-lower-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) { .dashboard-card-grid, .quick-actions { grid-template-columns: 1fr 1fr; } .dashboard-welcome .header { align-items: flex-start; } .dashboard-status { padding: 7px 10px; font-size: 9px; } .quick-action { padding: 11px 9px; } .quick-action span { display: none; } .dashboard-panel-header { align-items: flex-start; } }
+    @media (max-width: 410px) { .dashboard-card-grid, .quick-actions { grid-template-columns: 1fr; } .donut-area { justify-content: center; flex-wrap: wrap; } }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <aside class="sidebar">
+
+      <div class="dashboard-logo">
+
+        <div class="dashboard-logo-mark">
+          OG
+        </div>
+
+        <div class="dashboard-logo-text">
+          <strong>OGONG HARDWARE</strong>
+          <span>BUILT TOGETHER</span>
+        </div>
+
+      </div>
+
+      <div id="sidebar-nav"></div>
+
+    </aside>
+
+
+
+    <main class="main dashboard-main">
+
+      <div class="dashboard-welcome">
+
+        <div class="header">
+
+          <div>
+
+            <h2>Dashboard Operation</h2>
+
+            <p>Welcome back, <span class="current-user"></span>. Here is today's operational overview.</p>
+
+          </div>
+
+          <div class="dashboard-status">LIVE CONNECTED</div>
+
+        </div>
+
+      </div>
+
+
+      <div id="alert-container"></div>
+
+      <section class="dashboard-section">
+
+        <div class="dashboard-card-grid">
+
+          <div class="dashboard-stat">
+
+            <div class="dashboard-stat-label">
+              Total Products
+            </div>
+
+            <div
+              class="dashboard-stat-value"
+              id="total-products"
+            >
+              0
+            </div>
+
+            <div class="dashboard-stat-note">
+              Products registered in inventory
+            </div>
+
+          </div>
+
+
+          <div
+            class="dashboard-stat warning"
+          >
+
+            <div class="dashboard-stat-label">
+              Low Stock Warning
+            </div>
+
+            <div
+              class="dashboard-stat-value"
+              id="low-stock-products"
+            >
+              0
+            </div>
+
+            <div class="dashboard-stat-note">
+              Products needing attention
+            </div>
+
+          </div>
+
+
+          <div class="dashboard-stat success">
+
+            <div class="dashboard-stat-label">
+              Today's Sales
+            </div>
+
+            <div
+              class="dashboard-stat-value"
+              id="todays-sales"
+            >
+              ₱0.00
+            </div>
+
+            <div class="dashboard-stat-note">
+              Sales recorded today
+            </div>
+
+          </div>
+
+
+          <div class="dashboard-stat">
+
+            <div class="dashboard-stat-label">
+              Total Sales
+            </div>
+
+            <div
+              class="dashboard-stat-value"
+              id="total-sales"
+            >
+              ₱0.00
+            </div>
+
+            <div class="dashboard-stat-note">
+              Overall recorded sales
+            </div>
+
+          </div>
+
+
+          <div class="dashboard-stat">
+
+            <div class="dashboard-stat-label">
+              Product Categories
+            </div>
+
+            <div
+              class="dashboard-stat-value"
+              id="categories-count"
+            >
+              0
+            </div>
+
+            <div class="dashboard-stat-note">
+              Product categories
+            </div>
+
+          </div>
+
+
+          <div class="dashboard-stat">
+
+            <div class="dashboard-stat-label">
+              Active Suppliers
+            </div>
+
+            <div
+              class="dashboard-stat-value"
+              id="suppliers-count"
+            >
+              0
+            </div>
+
+            <div class="dashboard-stat-note">
+              Registered suppliers
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <section class="dashboard-section">
+
+        <div class="dashboard-section-header">
+
+          <h3>Quick System Operations</h3>
+
+        </div>
+
+
+        <div class="quick-actions">
+
+          <a
+            href="pos.html"
+            class="quick-action"
+          >
+
+            <div class="quick-action-icon">
+              POS
+            </div>
+
+            <strong>New Sale Terminal</strong>
+
+            <span>
+              Launch instant retail checkout.
+            </span>
+
+          </a>
+
+
+          <a
+            href="products.html"
+            class="quick-action"
+          >
+
+            <div class="quick-action-icon">
+              INV
+            </div>
+
+            <strong>Inventory Audit</strong>
+
+            <span>
+              Conduct batch counts and inspect stock.
+            </span>
+
+          </a>
+
+
+          <a
+            href="products.html"
+            class="quick-action"
+          >
+
+            <div class="quick-action-icon">
+              PR
+            </div>
+
+            <strong>Manage Products</strong>
+
+            <span>
+              Create brands, listings, and prices.
+            </span>
+
+          </a>
+
+
+          <a
+            href="categories.html"
+            class="quick-action"
+          >
+
+            <div class="quick-action-icon">
+              CAT
+            </div>
+
+            <strong>Configure Sectors</strong>
+
+            <span>
+              Re-index organizational categories.
+            </span>
+
+          </a>
+
+        </div>
+
+      </section>
+
+
+      <div class="dashboard-lower-grid">
+
+        <div class="dashboard-column">
+          <section class="dashboard-panel">
+            <div class="dashboard-panel-header">
+              <div>
+                <h3>Sales Velocity Trend</h3>
+                <p class="dashboard-panel-subtitle">Tracked revenue across recent retail cycles</p>
+              </div>
+              <div class="trend-meta">TODAY'S GROWTH: <strong id="sales-growth">--</strong></div>
+            </div>
+            <div class="dashboard-panel-body">
+              <div id="sales-trend-chart" class="trend-chart" aria-label="Sales velocity trend"></div>
+            </div>
+          </section>
+
+          <section class="dashboard-panel">
+            <div class="dashboard-panel-header">
+              <div>
+                <h3>Recent Sales Records</h3>
+                <p class="dashboard-panel-subtitle">Latest completed transactions</p>
+              </div>
+              <a href="sales.html" class="button button-secondary" style="text-decoration:none;">Transaction Log</a>
+            </div>
+            <div class="dashboard-panel-body" id="recent-sales-list">
+              <div class="dashboard-empty">Loading sales...</div>
+            </div>
+          </section>
+        </div>
+
+        <div class="dashboard-column">
+          <section class="dashboard-panel">
+            <div class="dashboard-panel-header">
+              <div>
+                <h3>Low Stock Products</h3>
+                <p class="dashboard-panel-subtitle">Priority items nearing threshold depletion</p>
+              </div>
+              <a href="products.html" class="button button-secondary" style="text-decoration:none;">View Inventory</a>
+            </div>
+            <div class="dashboard-panel-body" id="low-stock-list">
+              <div class="dashboard-empty">Loading inventory...</div>
+            </div>
+          </section>
+
+          <section class="dashboard-panel">
+            <div class="dashboard-panel-header">
+              <div>
+                <h3>Volume Distribution</h3>
+                <p class="dashboard-panel-subtitle">Product mix by active category</p>
+              </div>
+            </div>
+            <div class="dashboard-panel-body">
+              <div class="donut-area">
+                <svg id="volume-donut-chart" class="donut-chart" viewBox="0 0 120 120" role="img" aria-label="Volume distribution chart"></svg>
+                <div id="volume-legend" class="volume-legend"></div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+
+  
+
+  <script src="js/app.js"></script>
+
+
+  <script>
+
+   
+
+    const user = requireAuth();
+
+    if (!user) {
+      throw new Error('Authentication required.');
+    }
+
+
+    
+
+    renderSidebar('dashboard');
+
+
+    if (typeof renderTopbar === 'function') {
+      renderTopbar();
+    }
+
+
+    
+
+    function renderSalesTrend(sales) {
+      const chart = document.getElementById('sales-trend-chart');
+      if (!chart) return;
+      const days = Array.from({ length: 7 }, (_, index) => {
+        const date = new Date();
+        date.setHours(0, 0, 0, 0);
+        date.setDate(date.getDate() - (6 - index));
+        return date;
+      });
+      const totals = days.map(day => sales.reduce((sum, sale) => {
+        const saleDate = sale.sale_date ? new Date(sale.sale_date) : null;
+        return saleDate && saleDate.toDateString() === day.toDateString()
+          ? sum + Number(sale.total_amount || 0)
+          : sum;
+      }, 0));
+      const max = Math.max(...totals, 1);
+      chart.innerHTML = totals.map((total, index) => `
+        <div class="trend-bar-wrap">
+          <div class="trend-bar ${index === 6 ? 'today' : ''}" style="height:${Math.max(4, total / max * 100)}%" title="${formatCurrency(total)}"></div>
+          <span class="trend-label">${days[index].toLocaleDateString('en-US', { weekday: 'short' })}</span>
+        </div>
+      `).join('');
+      const yesterday = totals[5];
+      const growth = yesterday ? ((totals[6] - yesterday) / yesterday) * 100 : 0;
+      document.getElementById('sales-growth').textContent = `${growth >= 0 ? '+' : ''}${growth.toFixed(1)}%`;
+    }
+
+    function renderVolumeDistribution(products) {
+      const chart = document.getElementById('volume-donut-chart');
+      const legend = document.getElementById('volume-legend');
+      if (!chart || !legend) return;
+      const counts = products.reduce((result, product) => {
+        const category = product.category_name || 'Uncategorized';
+        result[category] = (result[category] || 0) + 1;
+        return result;
+      }, {});
+      const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+      const total = entries.reduce((sum, entry) => sum + entry[1], 0) || 1;
+      const colors = ['#2864e5', '#10b981', '#8bb4ed'];
+      let offset = 0;
+      chart.innerHTML = `<circle cx="60" cy="60" r="42" fill="none" stroke="#edf2f7" stroke-width="11"/>`;
+      entries.forEach(([name, count], index) => {
+        const percentage = count / total * 100;
+        chart.innerHTML += `<circle cx="60" cy="60" r="42" fill="none" stroke="${colors[index]}" stroke-width="11" stroke-dasharray="${percentage * 2.64} ${264 - percentage * 2.64}" stroke-dashoffset="${-offset * 2.64}" transform="rotate(-90 60 60)"/>`;
+        offset += percentage;
+      });
+      chart.innerHTML += '<text x="60" y="59" class="donut-label">' + products.length + '</text><text x="60" y="70" class="donut-caption">ITEMS</text>';
+      legend.innerHTML = entries.map(([name, count], index) => `<span><i class="${index === 1 ? 'green' : index === 2 ? 'light' : ''}"></i>${name} (${Math.round(count / total * 100)}%)</span>`).join('');
+    }
+
+    async function loadDashboard() {
+
+      try {
+
+        const [products, categories, suppliers, sales] =
+          await Promise.all([
+            apiFetch('/products'),
+            apiFetch('/categories'),
+            apiFetch('/suppliers'),
+            apiFetch('/sales')
+          ]);
+
+        const today = new Date().toDateString();
+        const todaysSales = sales
+          .filter(sale => sale.sale_date && new Date(sale.sale_date).toDateString() === today)
+          .reduce((total, sale) => total + Number(sale.total_amount || 0), 0);
+        const totalSales = sales
+          .reduce((total, sale) => total + Number(sale.total_amount || 0), 0);
+        const data = {
+          total_products: products.length,
+          low_stock_products: products.filter(product =>
+            Number(product.stock_quantity) <= Number(product.reorder_level)
+          ).length,
+          todays_sales: todaysSales,
+          total_sales: totalSales,
+          categories_count: categories.length,
+          suppliers_count: suppliers.length
+        };
+
+
+        
+
+        document.getElementById(
+          'total-products'
+        ).textContent =
+          data.total_products ?? 0;
+
+
+        document.getElementById(
+          'low-stock-products'
+        ).textContent =
+          data.low_stock_products ?? 0;
+
+
+        document.getElementById(
+          'todays-sales'
+        ).textContent =
+          formatCurrency(data.todays_sales ?? 0);
+
+
+        document.getElementById(
+          'total-sales'
+        ).textContent =
+          formatCurrency(data.total_sales ?? 0);
+
+
+        document.getElementById(
+          'categories-count'
+        ).textContent =
+          data.categories_count ?? 0;
+
+
+        document.getElementById(
+          'suppliers-count'
+        ).textContent =
+          data.suppliers_count ?? 0;
+
+        renderSalesTrend(sales);
+        renderVolumeDistribution(products);
+
+        await loadLowStock();
+
+        await loadRecentSales();
+
+
+      } catch (error) {
+
+        console.error(
+          'Dashboard error:',
+          error
+        );
+
+        showAlert(
+          error.message ||
+          'Unable to load dashboard data.',
+          'danger'
+        );
+
+      }
+
+    }
+
+
+    async function loadLowStock() {
+
+      const container =
+        document.getElementById(
+          'low-stock-list'
+        );
+
+
+      try {
+
+        const products =
+          await apiFetch('/products');
+
+
+        const lowStock =
+          products
+            .filter(product =>
+              Number(product.stock_quantity) <=
+              Number(product.reorder_level)
+            )
+            .slice(0, 5);
+
+
+        if (!lowStock.length) {
+
+          container.innerHTML = `
+            <div class="stock-health"><strong>All Stocks Healthy</strong>0 products require immediate reordering attention.</div>
+            <div class="dashboard-empty">No low-stock products.</div>
+          `;
+
+          return;
+        }
+
+
+        container.innerHTML = '';
+
+
+        lowStock.forEach(product => {
+
+          const item =
+            document.createElement('div');
+
+          item.className =
+            'low-stock-item';
+
+
+          const stock = Number(product.stock_quantity || 0);
+          const reorderLevel = Number(product.reorder_level || 1);
+          const percentage = Math.min(100, Math.max(4, stock / reorderLevel * 100));
+          item.innerHTML = `
+            <div class="low-stock-line">
+              <span>${product.product_name}</span>
+              <span class="low-stock-badge">${stock} units</span>
+            </div>
+            <div class="low-stock-category">${product.category_name || 'Inventory item'}</div>
+            <div class="low-stock-meter"><span style="width:${percentage}%"></span></div>
+          `;
+
+
+          container.appendChild(item);
+
+        });
+
+
+      } catch (error) {
+
+        console.warn(
+          'Low stock data unavailable:',
+          error
+        );
+
+        container.innerHTML = `
+          <div class="dashboard-empty">
+            Inventory information unavailable.
+          </div>
+        `;
+
+      }
+
+    }
+
+    async function loadRecentSales() {
+
+      const container =
+        document.getElementById(
+          'recent-sales-list'
+        );
+
+
+      try {
+
+        const sales =
+          await apiFetch('/sales');
+
+
+        const recent =
+          Array.isArray(sales)
+            ? sales.slice(0, 5)
+            : [];
+
+
+        if (!recent.length) {
+
+          container.innerHTML = `
+            <div class="dashboard-empty">
+              No recent sales found.
+            </div>
+          `;
+
+          return;
+        }
+
+
+        container.innerHTML = `
+          <div class="table-responsive">
+            <table class="sales-table">
+              <thead><tr><th>Order ID</th><th>Customer Type</th><th>Revenue (₱)</th></tr></thead>
+              <tbody>${recent.map(sale => `
+                <tr>
+                  <td>${sale.invoice_number || `Sale #${sale.id}`}</td>
+                  <td>${sale.customer_type || (sale.sale_date ? new Date(sale.sale_date).toLocaleDateString() : 'Walk-in')}</td>
+                  <td class="recent-sale-amount">${formatCurrency(sale.total_amount ?? 0)}</td>
+                </tr>
+              `).join('')}</tbody>
+            </table>
+          </div>
+        `;
+
+
+      } catch (error) {
+
+        console.warn(
+          'Recent sales unavailable:',
+          error
+        );
+
+        container.innerHTML = `
+          <div class="dashboard-empty">
+            Sales information unavailable.
+          </div>
+        `;
+
+      }
+
+    }
+
+    loadDashboard();
+
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales History - OGONG Hardware</title>
+  <link rel="stylesheet" href="css/styles.css">
+
+  <style>
+    .sales-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .sales-summary .card {
+      margin: 0;
+    }
+
+    .sales-summary p {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 8px 0 0;
+    }
+
+    .sales-filters {
+      display: flex;
+      gap: 10px;
+      align-items: end;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .sales-filters .form-group {
+      margin: 0;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .sales-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .loading-state,
+    .empty-state {
+      text-align: center;
+      padding: 30px;
+      color: #6b7280;
+    }
+
+    .sale-detail-header {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .sale-detail-box {
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .sale-detail-box small {
+      display: block;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+
+    .sale-detail-box strong {
+      font-size: 15px;
+    }
+
+    .receipt-total {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-top: 1px solid #e5e7eb;
+      margin-top: 12px;
+      font-size: 18px;
+    }
+
+    .receipt-payment {
+      margin-top: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .table-responsive {
+        overflow-x: auto;
+      }
+
+      .sales-filters {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .sales-filters .form-group {
+        width: 100%;
+      }
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+
+      #sale-detail-modal,
+      #sale-detail-modal * {
+        visibility: visible;
+      }
+
+      #sale-detail-modal {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+
+      .modal-close,
+      .receipt-actions {
+        display: none !important;
+      }
+    }
+
+    .dashboard-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      
+      
+    }
+
+    .dashboard-logo-mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: #0f2747;
+      background:
+          linear-gradient(
+                    rgba(0, 0, 0, 0.326),
+                    rgba(0, 0, 0, 0.44)
+                ),
+          url("images/logo.png");
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 800;
+      box-shadow: 0 4px 12px rgba(15, 39, 71, 0.18);
+    }
+
+    .dashboard-logo-text {
+      line-height: 1.1;
+    }
+
+    .dashboard-logo-text strong {
+      display: block;
+      font-size: 16px;
+      color: #0f2747;
+    }
+
+    .dashboard-logo-text span {
+      display: block;
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 3px;
+      letter-spacing: .5px;
+    }
+    
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+ <aside class="sidebar">
+
+      <div class="dashboard-logo">
+
+        <div class="dashboard-logo-mark">
+          OG
+        </div>
+
+        <div class="dashboard-logo-text">
+          <strong>OGONG HARDWARE</strong>
+          <span>BUILT TOGETHER</span>
+        </div>
+
+      </div>
+
+      <div id="sidebar-nav"></div>
+
+    </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div>
+        <h2>Sales History</h2>
+        <p>Review completed store transactions and sale details.</p>
+      </div>
+    </div>
+
+    <div id="alert-container"></div>
+
+    <!-- SUMMARY -->
+    <div class="sales-summary">
+
+      <div class="card">
+        <h3>Transactions</h3>
+        <p id="sales-count">0</p>
+      </div>
+
+      <div class="card">
+        <h3>Total Sales</h3>
+        <p id="sales-total">₱0.00</p>
+      </div>
+
+    </div>
+
+    <!-- FILTERS -->
+    <div class="table-card">
+
+      <div class="sales-filters">
+
+        <div class="form-group">
+          <label for="sales-search">Search</label>
+          <input
+            class="search-input"
+            id="sales-search"
+            type="text"
+            placeholder="Invoice or cashier..."
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="sales-payment">Payment Method</label>
+          <select id="sales-payment">
+            <option value="">All Payment Methods</option>
+            <option value="Cash">Cash</option>
+            <option value="GCash">GCash</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+          </select>
+        </div>
+
+        <div class="sales-actions">
+
+          <button
+            class="button button-secondary"
+            id="sales-search-btn"
+            type="button"
+          >
+            Search
+          </button>
+
+          <button
+            class="button button-secondary"
+            id="sales-clear-btn"
+            type="button"
+          >
+            Clear
+          </button>
+
+          <button
+            class="button button-secondary"
+            id="sales-refresh-btn"
+            type="button"
+          >
+            Refresh
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- SALES TABLE -->
+    <div class="table-card">
+
+      <div class="table-responsive">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Invoice</th>
+              <th>Date</th>
+              <th>Cashier</th>
+              <th>Total</th>
+              <th>Payment</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody id="sales-table-body"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+
+<!-- SALE DETAIL MODAL -->
+<div class="modal" id="sale-detail-modal">
+
+  <div class="modal-content">
+
+    <div class="modal-header">
+
+      <h2>Sale Receipt</h2>
+
+      <button
+        class="modal-close"
+        type="button"
+        onclick="closeModal('sale-detail-modal')"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div id="sale-detail-content"></div>
+
+    <div
+      class="top-bar receipt-actions"
+      style="margin-top: 16px;"
+    >
+
+      <button
+        class="button button-primary"
+        id="print-sale-btn"
+        type="button"
+      >
+        Print Receipt
+      </button>
+
+      <button
+        class="button button-secondary"
+        type="button"
+        onclick="closeModal('sale-detail-modal')"
+      >
+        Close
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script src="js/app.js"></script>
+
+<script>
+
+  const user = requireAuth();
+
+  if (!user) {
+    window.location.href = 'login.html';
+  } else {
+
+    renderSidebar('sales');
+    renderTopbar();
+    setupModalClose('sale-detail-modal');
+
+  }
+
+
+  let allSales = [];
+
+
+  /*
+   * LOAD SALES
+   */
+  async function loadSales(search = '') {
+
+    const tbody = document.getElementById('sales-table-body');
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" class="loading-state">
+          Loading sales...
+        </td>
+      </tr>
+    `;
+
+    try {
+
+      const query = search
+        ? `?search=${encodeURIComponent(search)}`
+        : '';
+
+      const sales = await apiFetch(`/sales${query}`);
+
+      allSales = Array.isArray(sales) ? sales : [];
+
+      renderSales(allSales);
+
+    } catch (error) {
+
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" class="empty-state">
+            Unable to load sales.
+          </td>
+        </tr>
+      `;
+
+      showAlert(error.message, 'danger');
+
+    }
+
+  }
+
+
+  /*
+   * RENDER SALES
+   */
+  function renderSales(sales) {
+
+    const tbody =
+      document.getElementById('sales-table-body');
+
+    const payment =
+      document.getElementById('sales-payment').value;
+
+    let filteredSales = sales;
+
+    if (payment) {
+
+      filteredSales = sales.filter(
+        sale => sale.payment_method === payment
+      );
+
+    }
+
+
+    // SUMMARY
+
+    document.getElementById('sales-count').textContent =
+      filteredSales.length;
+
+    const total = filteredSales.reduce(
+      (sum, sale) =>
+        sum + Number(sale.total_amount || 0),
+      0
+    );
+
+    document.getElementById('sales-total').textContent =
+      formatCurrency(total);
+
+
+    // EMPTY STATE
+
+    if (!filteredSales.length) {
+
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" class="empty-state">
+            No sales transactions found.
+          </td>
+        </tr>
+      `;
+
+      return;
+
+    }
+
+
+    tbody.innerHTML = '';
+
+
+    filteredSales.forEach(sale => {
+
+      const row = document.createElement('tr');
+
+      const date = sale.sale_date
+        ? new Date(sale.sale_date).toLocaleString()
+        : '-';
+
+      row.innerHTML = `
+
+        <td>
+          <strong>${escapeHTML(sale.invoice_number)}</strong>
+        </td>
+
+        <td>
+          ${escapeHTML(date)}
+        </td>
+
+        <td>
+          ${escapeHTML(sale.cashier || '-')}
+        </td>
+
+        <td>
+          <strong>
+            ${formatCurrency(sale.total_amount)}
+          </strong>
+        </td>
+
+        <td>
+          ${escapeHTML(sale.payment_method || '-')}
+        </td>
+
+        <td>
+
+          <button
+            class="button button-secondary"
+            type="button"
+            onclick="viewSale(${sale.id})"
+          >
+            View
+          </button>
+
+        </td>
+
+      `;
+
+      tbody.appendChild(row);
+
+    });
+
+  }
+
+
+  /*
+   * VIEW SALE
+   */
+  async function viewSale(id) {
+
+    try {
+
+      const sale =
+        await apiFetch(`/sales/${id}`);
+
+      const rows =
+        (sale.items || []).map(item => `
+
+          <tr>
+
+            <td>
+              ${escapeHTML(item.product_name)}
+            </td>
+
+            <td>
+              ${item.quantity}
+            </td>
+
+            <td>
+              ${formatCurrency(item.price)}
+            </td>
+
+            <td>
+              ${formatCurrency(item.subtotal)}
+            </td>
+
+          </tr>
+
+        `).join('');
+
+
+      document.getElementById(
+        'sale-detail-content'
+      ).innerHTML = `
+
+        <div class="sale-detail-header">
+
+          <div class="sale-detail-box">
+            <small>Invoice</small>
+            <strong>
+              ${escapeHTML(sale.invoice_number)}
+            </strong>
+          </div>
+
+          <div class="sale-detail-box">
+            <small>Date</small>
+            <strong>
+              ${escapeHTML(
+                new Date(sale.sale_date).toLocaleString()
+              )}
+            </strong>
+          </div>
+
+          <div class="sale-detail-box">
+            <small>Cashier</small>
+            <strong>
+              ${escapeHTML(sale.cashier || '-')}
+            </strong>
+          </div>
+
+          <div class="sale-detail-box">
+            <small>Payment Method</small>
+            <strong>
+              ${escapeHTML(sale.payment_method || '-')}
+            </strong>
+          </div>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>Product</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Amount</th>
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              ${rows || `
+                <tr>
+                  <td colspan="4">
+                    No items found.
+                  </td>
+                </tr>
+              `}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+
+        <div class="receipt-total">
+
+          <span>Total</span>
+
+          <strong>
+            ${formatCurrency(sale.total_amount)}
+          </strong>
+
+        </div>
+
+
+        <div class="receipt-payment">
+
+          <p>
+            <strong>Payment:</strong>
+            ${escapeHTML(sale.payment_method || '-')}
+          </p>
+
+          ${
+            sale.payment_method === 'Cash'
+              ? `
+                <p>
+                  <strong>Amount Received:</strong>
+                  ${formatCurrency(sale.amount_received)}
+                </p>
+
+                <p>
+                  <strong>Change:</strong>
+                  ${formatCurrency(sale.change_amount)}
+                </p>
+              `
+              : ''
+          }
+
+        </div>
+
+      `;
+
+
+      openModal('sale-detail-modal');
+
+    } catch (error) {
+
+      showAlert(error.message, 'danger');
+
+    }
+
+  }
+
+
+  /*
+   * SEARCH
+   */
+  document
+    .getElementById('sales-search-btn')
+    .addEventListener('click', () => {
+
+      const search =
+        document.getElementById('sales-search')
+          .value
+          .trim();
+
+      loadSales(search);
+
+    });
+
+
+  /*
+   * ENTER KEY SEARCH
+   */
+  document
+    .getElementById('sales-search')
+    .addEventListener('keydown', event => {
+
+      if (event.key === 'Enter') {
+
+        document
+          .getElementById('sales-search-btn')
+          .click();
+
+      }
+
+    });
+
+
+  /*
+   * PAYMENT FILTER
+   */
+  document
+    .getElementById('sales-payment')
+    .addEventListener('change', () => {
+
+      renderSales(allSales);
+
+    });
+
+
+  /*
+   * CLEAR
+   */
+  document
+    .getElementById('sales-clear-btn')
+    .addEventListener('click', () => {
+
+      document.getElementById('sales-search').value = '';
+
+      document.getElementById('sales-payment').value = '';
+
+      loadSales();
+
+    });
+
+
+  /*
+   * REFRESH
+   */
+  document
+    .getElementById('sales-refresh-btn')
+    .addEventListener('click', () => {
+
+      loadSales(
+        document.getElementById('sales-search').value.trim()
+      );
+
+    });
+
+
+  /*
+   * PRINT RECEIPT
+   */
+  document
+    .getElementById('print-sale-btn')
+    .addEventListener('click', () => {
+
+      window.print();
+
+    });
+
+
+  /*
+   * ESCAPE HTML
+   */
+  function escapeHTML(value) {
+
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
+  }
+
+
+  // INITIAL LOAD
+  loadSales();
+
+</script>
+
+</body>
+</html>

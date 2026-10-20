@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ogong Hardware unifies inventory, operations, and point-of-sale management.">
+    <title>Ogong Hardware | Hardware operations, organized</title>
+    <style>
+        :root {
+            --ink: #102c4b;
+            --navy: #0b2542;
+            --blue: #1769e0;
+            --blue-dark: #0f54ba;
+            --muted: #647a91;
+            --line: #dce6f0;
+            --surface: #ffffff;
+            --wash: #f3f7fb;
+            --wash-blue: #eaf3fc;
+            --max: 1180px;
+        }
+
+        * { box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            background: var(--wash);
+            font-family: "Segoe UI", Arial, sans-serif;
+            line-height: 1.5;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        .container { width: min(var(--max), calc(100% - 48px)); margin: 0 auto; }
+
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(255, 255, 255, .94);
+            border-bottom: 1px solid var(--line);
+            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(14px);
+        }
+
+        .nav {
+            min-height: 74px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 30px;
+        }
+
+        .brand { display: inline-flex; align-items: center; gap: 11px; font-weight: 750; letter-spacing: -.3px; }
+
+        .brand-mark {
+            width: 35px;
+            height: 35px;
+            display: grid;
+            place-items: center;
+            color: #fff;
+            background: var(--navy);
+            border-radius: 9px;
+            font-size: 17px;
+        }
+
+        .brand small { display: block; color: var(--muted); font-size: 10px; font-weight: 500; letter-spacing: .5px; }
+
+        .nav-links { display: flex; align-items: center; gap: 29px; margin-left: auto; color: #536b83; font-size: 13px; }
+        .nav-links a:hover, .text-link:hover { color: var(--blue); }
+        .nav-actions { display: flex; align-items: center; gap: 17px; font-size: 13px; }
+        .sign-in { color: var(--ink); font-weight: 650; }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 0 18px;
+            border: 1px solid transparent;
+            border-radius: 7px;
+            font-size: 13px;
+            font-weight: 700;
+            transition: transform .2s ease, background .2s ease, border-color .2s ease;
+        }
+
+        .button:hover { transform: translateY(-2px); }
+        .button-primary { color: #fff; background: var(--blue); box-shadow: 0 7px 16px rgba(23, 105, 224, .18); }
+        .button-primary:hover { background: var(--blue-dark); }
+        .button-ghost { color: var(--ink); background: #fff; border-color: #c8d7e5; }
+        .button-ghost:hover { border-color: var(--blue); }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            padding: 106px 0 90px;
+            background: linear-gradient(135deg, #f7fafd 0%, #edf5fc 62%, #e6f0fa 100%);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            width: 410px;
+            height: 410px;
+            right: -120px;
+            top: -150px;
+            border: 1px solid rgba(62, 131, 203, .13);
+            border-radius: 50%;
+            box-shadow: 0 0 0 38px rgba(62, 131, 203, .035), 0 0 0 78px rgba(62, 131, 203, .025);
+        }
+
+        .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1.05fr .95fr; align-items: center; gap: 75px; }
+        .eyebrow { margin: 0 0 18px; color: var(--blue); font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; }
+        h1, h2, h3, p { margin-top: 0; }
+        h1 { max-width: 620px; margin-bottom: 22px; color: var(--navy); font-size: clamp(42px, 5.4vw, 70px); line-height: 1.03; letter-spacing: -2.8px; }
+        .hero-copy { max-width: 520px; color: var(--muted); font-size: 16px; }
+        .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 31px; }
+        .hero-note { display: flex; align-items: center; gap: 8px; margin-top: 24px; color: #7890a7; font-size: 11px; }
+        .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #2bb673; box-shadow: 0 0 0 4px rgba(43, 182, 115, .12); }
+
+        .hero-visual { min-height: 340px; padding: 18px; background: rgba(255, 255, 255, .62); border: 1px solid rgba(160, 185, 208, .55); border-radius: 13px; box-shadow: 0 25px 55px rgba(34, 72, 111, .11); transform: rotate(1.5deg); }
+        .window-bar { display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 4px 12px; border-bottom: 1px solid var(--line); }
+        .window-bar i { width: 6px; height: 6px; border-radius: 50%; background: #c1d1e0; }
+        .preview-body { display: grid; grid-template-columns: 85px 1fr; gap: 17px; padding-top: 17px; }
+        .preview-sidebar { min-height: 260px; padding: 10px 8px; color: #a9c5df; background: var(--navy); border-radius: 7px; }
+        .preview-sidebar b { display: block; margin: 0 0 24px; color: #fff; font-size: 8px; }
+        .preview-sidebar span { display: block; height: 8px; margin: 13px 5px; border-radius: 3px; background: #426181; }
+        .preview-sidebar span.active { background: #51a0f4; }
+        .preview-content h3 { margin: 4px 0 15px; font-size: 17px; }
+        .mini-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .mini-card { padding: 10px; background: #f8fbfe; border: 1px solid var(--line); border-radius: 6px; }
+        .mini-card small { color: var(--muted); font-size: 8px; }
+        .mini-card strong { display: block; margin-top: 5px; font-size: 15px; }
+        .chart { height: 118px; margin-top: 9px; padding: 13px; background: #fff; border: 1px solid var(--line); border-radius: 6px; }
+        .chart-label { display: flex; justify-content: space-between; color: var(--muted); font-size: 9px; }
+        .chart-line { height: 56px; margin-top: 13px; background: linear-gradient(165deg, transparent 44%, #4c98ec 45%, #4c98ec 48%, transparent 49%), linear-gradient(25deg, transparent 47%, #8bc1f7 48%, #8bc1f7 51%, transparent 52%); border-bottom: 1px solid #d6e2ed; }
+
+        .section { padding: 92px 0; }
+        .section-heading { max-width: 590px; margin-bottom: 40px; }
+        .section-heading h2 { margin-bottom: 12px; color: var(--navy); font-size: clamp(30px, 4vw, 46px); line-height: 1.1; letter-spacing: -1.5px; }
+        .section-heading p { color: var(--muted); font-size: 15px; }
+        .trusted { padding: 29px 0; background: #fff; border-bottom: 1px solid var(--line); }
+        .trusted-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+        .trusted-label { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; }
+        .partner-list { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 33px; color: #8295a8; font-size: 14px; font-weight: 700; }
+
+        .capability-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 17px; }
+        .capability-card, .testimonial { padding: 26px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 10px 26px rgba(25, 58, 91, .045); }
+        .capability-icon { display: grid; place-items: center; width: 42px; height: 42px; margin-bottom: 29px; color: var(--blue); background: var(--wash-blue); border-radius: 8px; font-size: 20px; }
+        .card-label { margin-bottom: 9px; color: var(--blue); font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+        .capability-card h3 { margin-bottom: 10px; font-size: 18px; }
+        .capability-card p, .testimonial p { margin-bottom: 0; color: var(--muted); font-size: 13px; }
+
+        .control-section { background: #fff; }
+        .control-preview { display: grid; grid-template-columns: 180px 1fr; min-height: 390px; overflow: hidden; background: #f8fbfe; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 20px 45px rgba(25, 58, 91, .08); }
+        .control-nav { padding: 24px 17px; color: #aec5db; background: var(--navy); }
+        .control-nav strong { display: block; margin-bottom: 30px; color: #fff; font-size: 13px; }
+        .control-nav span { display: block; margin: 20px 5px; font-size: 11px; }
+        .control-nav .selected { padding: 9px 8px; color: #fff; background: #1d4d7d; border-radius: 5px; }
+        .control-main { padding: 29px; }
+        .control-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 25px; }
+        .control-top h3 { margin: 0 0 5px; font-size: 22px; }
+        .control-top p { margin: 0; color: var(--muted); font-size: 11px; }
+        .online { padding: 7px 10px; color: #18764b; background: #e6f7ee; border-radius: 20px; font-size: 10px; font-weight: 700; }
+        .metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .metric { padding: 16px; background: #fff; border: 1px solid var(--line); border-radius: 7px; }
+        .metric span { color: var(--muted); font-size: 10px; }
+        .metric strong { display: block; margin: 8px 0 7px; font-size: 22px; }
+        .progress { height: 4px; overflow: hidden; background: #e6edf4; border-radius: 4px; }
+        .progress i { display: block; width: 76%; height: 100%; background: var(--blue); border-radius: inherit; }
+        .progress.green i { width: 91%; background: #29a56b; }
+        .preview-panels { display: grid; grid-template-columns: 1.3fr .7fr; gap: 12px; margin-top: 12px; }
+        .preview-panel { min-height: 145px; padding: 16px; background: #fff; border: 1px solid var(--line); border-radius: 7px; }
+        .preview-panel h4 { margin: 0 0 15px; font-size: 12px; }
+        .bars { display: flex; align-items: flex-end; gap: 9px; height: 90px; }
+        .bars i { flex: 1; background: #9ac7f5; border-radius: 3px 3px 0 0; }
+        .bars i:nth-child(1) { height: 45%; } .bars i:nth-child(2) { height: 69%; } .bars i:nth-child(3) { height: 55%; } .bars i:nth-child(4) { height: 88%; } .bars i:nth-child(5) { height: 73%; } .bars i:nth-child(6) { height: 96%; }
+        .status-list { display: grid; gap: 12px; color: var(--muted); font-size: 11px; }
+        .status-list span { display: flex; justify-content: space-between; gap: 10px; }
+        .status-list b { color: #1c8858; }
+
+        .stats { padding: 65px 0; color: #fff; background: var(--navy); }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+        .stat { padding-right: 20px; border-right: 1px solid #294662; }
+        .stat:last-child { border: 0; }
+        .stat strong { display: block; margin-bottom: 8px; color: #fff; font-size: 29px; letter-spacing: -1px; }
+        .stat span { color: #a9bfd5; font-size: 11px; }
+
+        .testimonial-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 17px; }
+        .testimonial > p { margin-bottom: 24px; color: #49627a; font-size: 14px; line-height: 1.7; }
+        .person { display: flex; align-items: center; gap: 10px; }
+        .avatar { display: grid; place-items: center; width: 34px; height: 34px; color: #fff; background: #3478b9; border-radius: 50%; font-size: 11px; font-weight: 700; }
+        .person strong { display: block; font-size: 12px; } .person span { display: block; color: var(--muted); font-size: 10px; }
+
+        .cta { padding: 84px 0; background: #eaf3fb; border-top: 1px solid var(--line); }
+        .cta-inner { display: flex; align-items: center; justify-content: space-between; gap: 35px; }
+        .cta h2 { margin-bottom: 12px; color: var(--navy); font-size: 38px; letter-spacing: -1.3px; }
+        .cta p { max-width: 500px; margin: 0; color: var(--muted); font-size: 14px; }
+        .cta-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+        footer { padding: 58px 0 27px; color: #a9bfd3; background: #081d34; }
+        .footer-grid { display: grid; grid-template-columns: 1.6fr repeat(3, 1fr); gap: 30px; padding-bottom: 45px; }
+        footer .brand { color: #fff; } footer .brand small { color: #8fa8c0; }
+        .footer-about { max-width: 250px; margin-top: 17px; font-size: 12px; line-height: 1.8; }
+        .footer-column strong { display: block; margin-bottom: 15px; color: #fff; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+        .footer-column a { display: block; margin: 11px 0; font-size: 12px; } .footer-column a:hover { color: #fff; }
+        .footer-bottom { display: flex; justify-content: space-between; gap: 15px; padding-top: 22px; border-top: 1px solid #203951; color: #7992a9; font-size: 11px; }
+        .footer-bottom div { display: flex; gap: 19px; }
+
+        @media (max-width: 850px) {
+            .nav-links { display: none; }
+            .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+            .hero { padding: 78px 0 65px; }
+            .hero-visual { max-width: 620px; transform: none; }
+            .capability-grid, .testimonial-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .stat:nth-child(2) { border: 0; }
+            .cta-inner { align-items: flex-start; flex-direction: column; }
+        }
+
+        @media (max-width: 560px) {
+            .container { width: min(100% - 32px, var(--max)); }
+            .nav { min-height: 65px; gap: 12px; } .nav-actions { gap: 10px; } .nav-actions .button { padding: 0 12px; }
+            h1 { font-size: 43px; letter-spacing: -1.8px; } .hero-copy { font-size: 14px; }
+            .hero-actions .button, .cta-actions .button { width: 100%; }
+            .trusted-row { align-items: flex-start; flex-direction: column; } .partner-list { justify-content: flex-start; gap: 14px 23px; }
+            .section { padding: 67px 0; } .section-heading { margin-bottom: 28px; }
+            .control-preview { grid-template-columns: 1fr; } .control-nav { display: none; } .control-main { padding: 18px; }
+            .metric-grid { grid-template-columns: 1fr; } .preview-panels { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 25px 12px; } .stat { border: 0; padding: 0; } .stat strong { font-size: 23px; }
+            .cta h2 { font-size: 31px; }
+            .footer-grid { grid-template-columns: 1fr 1fr; gap: 28px 16px; } .footer-grid .footer-brand { grid-column: 1 / -1; }
+            .footer-bottom { align-items: flex-start; flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container nav">
+            <a class="brand" href="index.html" aria-label="Ogong Hardware home">
+                <span class="brand-mark">O</span>
+                <span>Ogong Hardware<small>MANAGEMENT SYSTEM</small></span>
+            </a>
+            <nav class="nav-links" aria-label="Main navigation">
+                <a href="#platform">Platform</a><a href="#solutions">Solutions</a><a href="#pricing">Pricing</a><a href="#docs">Docs</a>
+            </nav>
+            <div class="nav-actions"><a class="sign-in" href="login.html">Sign In</a><a class="button button-primary" href="login.html">Get Started</a></div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero" id="platform">
+            <div class="container hero-grid">
+                <div>
+                    <p class="eyebrow">Hardware operations, organized</p>
+                    <h1>Infrastructure, organized.<br>Speed, optimized.</h1>
+                    <p class="hero-copy">Ogong Hardware gives operators one clear command center for inventory, point-of-sale, suppliers, and every moving part of the physical store.</p>
+                    <div class="hero-actions"><a class="button button-primary" href="login.html">Start Managing Now</a><a class="button button-ghost" href="#contact">Book Technical Demo</a></div>
+                    <div class="hero-note"><i class="status-dot"></i> Built for dependable daily operations</div>
+                </div>
+                <div class="hero-visual" aria-label="Operations dashboard preview">
+                    <div class="window-bar"><i></i><i></i><i></i></div>
+                    <div class="preview-body"><aside class="preview-sidebar"><b>OGONG / OPS</b><span class="active"></span><span></span><span></span><span></span><span></span></aside><div class="preview-content"><h3>Operations overview</h3><div class="mini-grid"><div class="mini-card"><small>Stock accuracy</small><strong>98.6%</strong></div><div class="mini-card"><small>Open orders</small><strong>1,284</strong></div><div class="mini-card"><small>System health</small><strong>99.9%</strong></div></div><div class="chart"><div class="chart-label"><span>System output</span><b>Last 30 days</b></div><div class="chart-line"></div></div></div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="trusted"><div class="container trusted-row"><span class="trusted-label">Powering next-generation hardware fleets</span><div class="partner-list"><span>BUILDCO</span><span>IRONWORKS</span><span>FIELDLINE</span><span>STACKHOUSE</span></div></div></section>
+
+        <section class="section" id="solutions"><div class="container"><div class="section-heading"><p class="eyebrow">One system, less friction</p><h2>Engineered to bring physical hardware to the cloud</h2><p>Make every product, transaction, and operational decision visible from a single source of truth.</p></div><div class="capability-grid"><article class="capability-card"><div class="capability-icon">+</div><p class="card-label">Visibility</p><h3>Real-Time State Tracking</h3><p>See stock movement, sales activity, and operational signals as they happen across your store.</p></article><article class="capability-card"><div class="capability-icon">&#9632;</div><p class="card-label">Enablement</p><h3>Zero-Touch Provisioning</h3><p>Give every team member the context and tools they need to move from shelf to sale without delay.</p></article><article class="capability-card"><div class="capability-icon">&#8599;</div><p class="card-label">Planning</p><h3>Smarter Maintenance Planning</h3><p>Turn everyday records into a calmer, more predictable plan for products, suppliers, and service.</p></article></div></div></section>
+
+        <section class="section control-section" id="docs"><div class="container"><div class="section-heading"><p class="eyebrow">Operator workspace</p><h2>A control pane designed for operators</h2><p>Clear hierarchy, focused signals, and the information your team needs at the moment it matters.</p></div><div class="control-preview"><aside class="control-nav"><strong>OGONG HARDWARE</strong><span class="selected">Overview</span><span>Products</span><span>Suppliers</span><span>Sales history</span><span>Reports</span></aside><div class="control-main"><div class="control-top"><div><h3>Device Clusters</h3><p>Regional hardware activity and system performance</p></div><span class="online">All systems online</span></div><div class="metric-grid"><div class="metric"><span>Active endpoints</span><strong>140,000+</strong><div class="progress"><i></i></div></div><div class="metric"><span>System health</span><strong>99.99%</strong><div class="progress green"><i></i></div></div><div class="metric"><span>Avg. latency</span><strong>2.4ms</strong><div class="progress"><i></i></div></div></div><div class="preview-panels"><div class="preview-panel"><h4>System Output Latency</h4><div class="bars"><i></i><i></i><i></i><i></i><i></i><i></i></div></div><div class="preview-panel"><h4>Cluster status</h4><div class="status-list"><span>North region <b>Healthy</b></span><span>Central region <b>Healthy</b></span><span>South region <b>Healthy</b></span></div></div></div></div></div></div></section>
+
+        <section class="stats" id="pricing"><div class="container stats-grid"><div class="stat"><strong>140,000+</strong><span>Active Hardware Endpoints</span></div><div class="stat"><strong>99.999%</strong><span>Uptime Monitor Agreement</span></div><div class="stat"><strong>&lt; 2.4ms</strong><span>Average Sync Latency</span></div><div class="stat"><strong>48 hours</strong><span>Standard Regional Deployment</span></div></div></section>
+
+        <section class="section"><div class="container"><div class="section-heading"><p class="eyebrow">From the field</p><h2>Trusted by lead operations technicians</h2></div><div class="testimonial-grid"><article class="testimonial"><p>"Ogong gives our team a shared operational language. We spend less time reconciling records and more time serving customers."</p><div class="person"><div class="avatar">MC</div><div><strong>Maria Cruz</strong><span>Regional Operations Lead</span></div></div></article><article class="testimonial"><p>"The clarity is the difference. Our sales floor and stockroom finally work from the same reliable picture."</p><div class="person"><div class="avatar">DR</div><div><strong>Daniel Reyes</strong><span>Hardware Systems Manager</span></div></div></article><article class="testimonial"><p>"It feels built around how operators actually work: quick signals, useful detail, and no noise between a question and an answer."</p><div class="person"><div class="avatar">SA</div><div><strong>Sofia Adeyemi</strong><span>Store Technology Director</span></div></div></article></div></div></section>
+
+        <section class="cta" id="contact"><div class="container cta-inner"><div><h2>Secure your hardware fleet today</h2><p>Bring your inventory, sales, and store operations into one confident daily rhythm.</p></div><div class="cta-actions"><a class="button button-primary" href="login.html">Create Free Account</a><a class="button button-ghost" href="mailto:sales@ogonghardware.example">Contact Sales Team</a></div></div></section>
+    </main>
+
+    <footer><div class="container"><div class="footer-grid"><div class="footer-brand"><a class="brand" href="index.html"><span class="brand-mark">O</span><span>Ogong Hardware<small>MANAGEMENT SYSTEM</small></span></a><p class="footer-about">A focused operations platform for the people who keep physical hardware moving.</p></div><div class="footer-column"><strong>Product</strong><a href="#platform">Platform</a><a href="#solutions">Solutions</a><a href="#pricing">Pricing</a></div><div class="footer-column"><strong>Resources</strong><a href="#docs">Documentation</a><a href="#contact">Technical Demo</a><a href="login.html">Sign In</a></div><div class="footer-column"><strong>Company</strong><a href="#contact">Contact</a><a href="#contact">About Ogong</a><a href="#contact">Careers</a></div></div><div class="footer-bottom"><span>&copy; 2026 Ogong Hardware. All rights reserved.</span><div><a href="#contact">Privacy Policy</a><a href="#contact">Terms of Service</a></div></div></div></footer>
+</body>
+</html>

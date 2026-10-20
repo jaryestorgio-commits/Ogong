@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Users - OGONG Hardware</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<style>
+  .dashboard-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      
+      
+    }
+
+    .dashboard-logo-mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: #0f2747;
+      background:
+          linear-gradient(
+                    rgba(0, 0, 0, 0.326),
+                    rgba(0, 0, 0, 0.44)
+                ),
+          url("images/logo.png");
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 800;
+      box-shadow: 0 4px 12px rgba(15, 39, 71, 0.18);
+    }
+
+    .dashboard-logo-text {
+      line-height: 1.1;
+    }
+
+    .dashboard-logo-text strong {
+      display: block;
+      font-size: 16px;
+      color: #0f2747;
+    }
+
+    .dashboard-logo-text span {
+      display: block;
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 3px;
+      letter-spacing: .5px;
+    }
+</style>
+<body>
+
+<div class="container">
+
+  <aside class="sidebar">
+
+      <div class="dashboard-logo">
+
+        <div class="dashboard-logo-mark">
+          OG
+        </div>
+
+        <div class="dashboard-logo-text">
+          <strong>OGONG HARDWARE</strong>
+          <span>BUILT TOGETHER</span>
+        </div>
+
+      </div>
+
+      <div id="sidebar-nav"></div>
+
+    </aside>
+
+          <main class="main">
+            <div class="header">
+      <div>
+          <h2>Users</h2>
+              <p>Manage system accounts, staff, and administrator access.</p>
+           </div>
+
+      <button
+        class="button button-primary"
+        id="add-user-btn"
+        type="button"
+      >
+        Add User
+      </button>
+    </div>
+
+
+    <div id="alert-container"></div>
+
+      <div class="table-card">
+
+      <div class="header">
+        <div>
+          <h3>System Users</h3>
+          <p>Accounts authorized to access the Ogong Hardware system.</p>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody id="users-table-body"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+<div class="modal" id="user-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+       <h2 id="user-modal-title">
+        Add User
+        </h2>
+
+      <button
+        class="modal-close"
+        id="user-modal-close"
+        type="button"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div id="user-modal-alert"></div>
+    <div class="form-group">
+
+      <label for="user-name">
+        Full Name
+      </label>
+
+      <input
+        id="user-name"
+        type="text"
+        placeholder="Enter full name"
+        autocomplete="name"
+      >
+
+    </div>
+    <div class="form-group">
+
+      <label for="user-username">
+        Username
+      </label>
+
+      <input
+        id="user-username"
+        type="text"
+        placeholder="Enter username"
+        autocomplete="username"
+      >
+
+    </div>
+    <div class="form-group">
+
+      <label for="user-password">
+        Password
+      </label>
+
+      <input
+        id="user-password"
+        type="password"
+        placeholder="Enter password"
+        autocomplete="new-password"
+      >
+
+      <small
+        id="password-help"
+        style="color:#6b7280;"
+      >
+        Password is required when creating a new user.
+      </small>
+
+    </div>
+    <div class="form-group">
+
+      <label for="user-role">
+        Role
+      </label>
+
+      <select id="user-role">
+
+        <option value="ADMIN">
+          ADMIN
+        </option>
+
+        <option value="STAFF">
+          STAFF
+        </option>
+
+      </select>
+    </div>
+    <div class="top-bar">
+
+      <button
+        class="button button-primary"
+        id="save-user-btn"
+        type="button"
+      >
+        Save User
+      </button>
+
+      <button
+        class="button button-secondary"
+        id="cancel-user-btn"
+        type="button"
+      >
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="js/app.js"></script>
+
+<script>
+
+let editingUserId = null;
+
+const user = requireAuth(['ADMIN']);
+
+if (!user) {
+
+  window.location.href = 'login.html';
+
+} else {
+
+  renderSidebar('users');
+  renderTopbar();
+
+}
+
+setupModalClose('user-modal');
+
+
+function resetUserForm() {
+
+  editingUserId = null;
+
+  document.getElementById('user-modal-title').textContent =
+    'Add User';
+
+  document.getElementById('user-name').value = '';
+
+  document.getElementById('user-username').value = '';
+
+  document.getElementById('user-password').value = '';
+
+  document.getElementById('user-role').value = 'STAFF';
+
+  document.getElementById('user-modal-alert').innerHTML = '';
+
+  document.getElementById('password-help').textContent =
+    'Password is required when creating a new user.';
+
+}
+
+document
+  .getElementById('add-user-btn')
+  .addEventListener('click', () => {
+
+    resetUserForm();
+
+    openModal('user-modal');
+
+  });
+
+async function loadUsers() {
+
+  try {
+
+    const users = await apiFetch('/users');
+
+    const tbody =
+      document.getElementById('users-table-body');
+
+    tbody.innerHTML = '';
+
+
+    if (!users || users.length === 0) {
+
+      tbody.innerHTML = `
+        <tr>
+          <td
+            colspan="5"
+            style="
+              text-align:center;
+              padding:20px;
+              color:#6b7280;
+            "
+          >
+            No users found.
+          </td>
+        </tr>
+      `;
+
+      return;
+
+    }
+
+
+    users.forEach(acc => {
+
+      const row =
+        document.createElement('tr');
+
+
+      const isCurrentUser =
+        Number(acc.id) === Number(user.id);
+
+
+      const roleLabel =
+        acc.role === 'ADMIN'
+          ? 'ADMIN'
+          : 'STAFF';
+
+
+      row.innerHTML = `
+
+        <td>
+          ${acc.id}
+        </td>
+
+        <td>
+          <strong>
+            ${escapeHTML(acc.name || '')}
+          </strong>
+
+          ${
+            isCurrentUser
+              ? `
+                <span
+                  style="
+                    margin-left:6px;
+                    font-size:12px;
+                    color:#2563eb;
+                    font-weight:600;
+                  "
+                >
+                  You
+                </span>
+              `
+              : ''
+          }
+
+        </td>
+
+        <td>
+          ${escapeHTML(acc.username || '')}
+        </td>
+
+        <td>
+          <span
+            style="
+              font-weight:600;
+              color:${
+                acc.role === 'ADMIN'
+                  ? '#b45309'
+                  : '#2563eb'
+              };
+            "
+          >
+            ${roleLabel}
+          </span>
+        </td>
+
+        <td>
+
+          <button
+            class="button button-secondary"
+            type="button"
+            onclick="editUser(${acc.id})"
+          >
+            Edit
+          </button>
+
+          <button
+            class="button button-danger"
+            type="button"
+            onclick="deleteUser(${acc.id})"
+            ${isCurrentUser ? 'disabled title="You cannot delete your own account."' : ''}
+          >
+            Delete
+          </button>
+
+        </td>
+
+      `;
+
+      tbody.appendChild(row);
+
+    });
+
+
+  } catch (error) {
+
+    showAlert(
+      error.message || 'Unable to load users.',
+      'danger'
+    );
+
+  }
+
+}
+
+async function editUser(id) {
+
+  try {
+
+    const users =
+      await apiFetch('/users');
+
+    const account =
+      users.find(item =>
+        Number(item.id) === Number(id)
+      );
+
+
+    if (!account) {
+
+      throw new Error('User not found.');
+
+    }
+
+
+    editingUserId = account.id;
+
+
+    document.getElementById(
+      'user-modal-title'
+    ).textContent = 'Edit User';
+
+
+    document.getElementById(
+      'user-name'
+    ).value = account.name || '';
+
+
+    document.getElementById(
+      'user-username'
+    ).value = account.username || '';
+
+
+    document.getElementById(
+      'user-password'
+    ).value = '';
+
+
+    document.getElementById(
+      'user-role'
+    ).value = account.role || 'STAFF';
+
+
+    document.getElementById(
+      'user-modal-alert'
+    ).innerHTML = '';
+
+
+    document.getElementById(
+      'password-help'
+    ).textContent =
+      'Leave password blank to keep the current password.';
+
+
+    openModal('user-modal');
+
+
+  } catch (error) {
+
+    showAlert(
+      error.message || 'Unable to load user.',
+      'danger'
+    );
+
+  }
+
+}
+
+
+async function deleteUser(id) {
+
+  /* Prevent deleting yourself */
+
+  if (Number(id) === Number(user.id)) {
+
+    showAlert(
+      'You cannot delete your own account.',
+      'danger'
+    );
+
+    return;
+
+  }
+
+
+  const confirmed =
+    confirm(
+      'Delete this user account?\n\nThis action cannot be undone.'
+    );
+
+
+  if (!confirmed) return;
+
+
+  try {
+
+    await apiFetch(
+      `/users/${id}`,
+      {
+        method: 'DELETE'
+      }
+    );
+
+
+    showAlert(
+      'User deleted successfully.',
+      'success'
+    );
+
+
+    await loadUsers();
+
+
+  } catch (error) {
+
+    showAlert(
+      error.message || 'Unable to delete user.',
+      'danger'
+    );
+
+  }
+
+}
+
+document
+  .getElementById('save-user-btn')
+  .addEventListener('click', async () => {
+
+
+    const name =
+      document
+        .getElementById('user-name')
+        .value
+        .trim();
+
+
+    const username =
+      document
+        .getElementById('user-username')
+        .value
+        .trim();
+
+
+    const password =
+      document
+        .getElementById('user-password')
+        .value
+        .trim();
+
+
+    const role =
+      document
+        .getElementById('user-role')
+        .value;
+
+
+    const alertBox =
+      document.getElementById(
+        'user-modal-alert'
+      );
+
+
+    alertBox.innerHTML = '';
+
+
+    /* Validation */
+
+    if (!name || !username || !role) {
+
+      alertBox.innerHTML = `
+        <div class="alert alert-danger">
+          Please fill in all required fields.
+        </div>
+      `;
+
+      return;
+
+    }
+
+    if (!editingUserId && !password) {
+
+      alertBox.innerHTML = `
+        <div class="alert alert-danger">
+          Password is required when creating a user.
+        </div>
+      `;
+
+      return;
+
+    }
+
+
+    try {
+
+      const payload = {
+
+        name,
+        username,
+        role
+
+      };
+
+      if (password) {
+
+        payload.password = password;
+
+      }
+
+
+      if (editingUserId) {
+
+        await apiFetch(
+          `/users/${editingUserId}`,
+          {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+          }
+        );
+
+
+        showAlert(
+          'User updated successfully.',
+          'success'
+        );
+
+
+      } else {
+
+        await apiFetch(
+          '/users',
+          {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          }
+        );
+
+
+        showAlert(
+          'User added successfully.',
+          'success'
+        );
+
+      }
+
+
+                                    closeModal('user-modal');
+
+                                    resetUserForm();
+
+                                    await loadUsers();
+
+
+                                  } catch (error) {
+
+                                    alertBox.innerHTML = `
+                                      <div class="alert alert-danger">
+                                        ${escapeHTML(
+                                          error.message ||
+                                          'Unable to save user.'
+                                        )}
+                                      </div>
+                                    `;
+
+                                  }
+
+                                });
+                    document
+                        .getElementById('cancel-user-btn')
+                        .addEventListener('click', () => {
+                          closeModal('user-modal');
+                          resetUserForm();
+
+                                                    });
+
+                          document
+                            .getElementById('user-modal-close')
+                              .addEventListener('click', () => {
+                                closeModal('user-modal');
+                                  resetUserForm();
+
+                                  });
+
+function escapeHTML(value) {
+
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+
+}
+
+if (user) {
+
+  loadUsers();
+
+}
+
+</script>
+
+</body>
+</html>

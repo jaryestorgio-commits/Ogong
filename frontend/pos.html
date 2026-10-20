@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Point of Sale - Ogong Hardware</title>
+
+    <link rel="stylesheet" href="css/styles.css">
+
+    <style>
+        .pos-page { background: #f7f9fc; }
+        .pos-page .main { min-width: 0; }
+        .pos-page-header { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-bottom: 20px; }
+        .pos-page-header h2 { margin: 0 0 5px; color: #102a43; font-size: 27px; }
+        .pos-page-header p { margin: 0; color: #708198; font-size: 13px; }
+        .pos-page-header > div:last-child { flex-wrap: wrap; }
+        .cashier-info { padding: 8px 12px; color: #718096; background: #fff; border: 1px solid #e4eaf1; border-radius: 8px; font-size: 11px; }
+        .cashier-info strong { display: block; margin-top: 2px; color: #183653; font-size: 12px; }
+        .pos-page .button { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 9px 13px; border-radius: 7px; font-size: 12px; font-weight: 700; }
+        .pos-page .button-primary { background: #1769e0; box-shadow: 0 4px 10px rgba(23,105,224,.16); }
+        .pos-page .button-primary:hover { background: #1058c4; }
+        .pos-page .button-secondary { color: #31516e; background: #f4f8fd; border: 1px solid #e2eaf3; }
+        .pos-page .button-secondary:hover { background: #eaf2fc; }
+        .pos-layout { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(390px, 1fr); align-items: start; gap: 16px; min-width: 0; }
+        .pos-panel { min-width: 0; padding: 17px; background: #fff; border: 1px solid #e4eaf1; border-radius: 10px; box-shadow: 0 6px 18px rgba(16,42,67,.045); }
+        .pos-panel .header { align-items: center; gap: 12px; margin-bottom: 15px; }
+        .pos-panel .header h3 { margin: 0 0 5px; color: #183653; font-size: 15px; }
+        .pos-panel .header p { margin: 0; color: #8293a7; font-size: 11px; }
+        .pos-toolbar { display: flex; gap: 9px; flex-wrap: wrap; }
+        .pos-toolbar input, .pos-toolbar select, .pos-panel .form-group input, .pos-panel .form-group select { min-width: 0; height: 39px; padding: 8px 11px; color: #183653; background: #fff; border: 1px solid #dfe7f0; border-radius: 7px; font-size: 12px; }
+        .pos-toolbar input:focus, .pos-toolbar select:focus, .pos-panel .form-group input:focus, .pos-panel .form-group select:focus { outline: 0; border-color: #75a9ed; box-shadow: 0 0 0 3px #edf5ff; }
+        .pos-toolbar input::placeholder { color: #98a7b8; }
+        .pos-toolbar .search-input:first-child { flex: 1 1 200px !important; }
+        .pos-toolbar select { flex: 0 1 180px; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 11px; margin-top: 13px; }
+        .product-card { display: block; min-width: 0; padding: 9px; color: inherit; text-align: left; background: #fff; border: 1px solid #e4eaf1; border-radius: 9px; cursor: pointer; transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease; }
+        .product-card:hover:not(:disabled), .product-card:focus-visible:not(:disabled) { border-color: #9fc4f4; box-shadow: 0 5px 14px rgba(23,105,224,.1); transform: translateY(-1px); }
+        .product-card:focus-visible { outline: 2px solid #75a9ed; outline-offset: 2px; }
+        .product-card[aria-disabled="true"] { cursor: not-allowed; opacity: .55; }
+        .product-image { display: grid; place-items: center; height: 112px; margin-bottom: 10px; overflow: hidden; background: transparent; }
+        .product-image img { max-width: 90%; max-height: 94px; object-fit: contain; }
+        .product-image-placeholder { display: grid; place-items: center; width: 43px; height: 43px; color: #1769e0; }
+        .product-image-placeholder svg { width: 23px; height: 23px; }
+        .product-image [hidden] { display: none !important; }
+        .product-name { display: block; min-height: 32px; overflow-wrap: anywhere; color: #183653; font-size: 12px; font-weight: 700; line-height: 1.35; }
+        .product-price { display: block; margin-top: 7px; color: #1769e0; font-size: 13px; font-weight: 800; }
+        .pos-panel .table-responsive { overflow: visible; }
+        .pos-cart-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+        .pos-cart-table thead { display: none; }
+        .pos-cart-table tbody tr:not(.pos-empty-row) { display: block; padding: 11px; background: #fbfcfe; border: 1px solid #e8eef5; border-radius: 8px; }
+        .pos-cart-table td { padding: 0; border: 0; }
+        .pos-empty-row { display: block; padding: 24px 12px !important; color: #8293a7; text-align: center !important; font-size: 12px; }
+        .sale-item { display: grid; gap: 10px; }
+        .sale-item-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+        .sale-item-name { min-width: 0; color: #183653; font-size: 12px; font-weight: 800; overflow-wrap: anywhere; }
+        .sale-item-remove { min-height: 29px !important; padding: 5px 8px !important; color: #b42318 !important; background: #fff5f4 !important; border: 1px solid #f5d3d0 !important; font-size: 10px !important; }
+        .sale-item-details { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+        .sale-item-detail { min-width: 0; color: #8494a7; font-size: 9px; }
+        .sale-item-detail strong { display: block; margin-top: 4px; color: #31516e; font-size: 10px; white-space: nowrap; }
+        .sale-item-quantity { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+        .sale-item-quantity label { color: #8494a7; font-size: 10px; }
+        .sale-item-quantity input { width: 66px; height: 32px; padding: 5px 7px; color: #183653; border: 1px solid #dfe7f0; border-radius: 6px; text-align: center; }
+        .transaction-summary { padding-top: 13px; margin-top: 8px; border-top: 1px solid #e8eef5; }
+        .summary-row { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 9px; color: #708198; font-size: 11px; }
+        .summary-row strong { color: #31516e; }
+        .summary-total { color: #102a43 !important; font-size: 20px; font-weight: 800; }
+        .payment-section { padding-top: 15px; margin-top: 15px; border-top: 1px solid #e8eef5; }
+        .payment-section h3 { margin: 0 0 13px; color: #183653; font-size: 14px; }
+        .pos-panel .form-group { gap: 6px; margin-bottom: 12px; }
+        .pos-panel .form-group label { color: #52677d; font-size: 11px; font-weight: 700; }
+        .complete-sale { width: 100%; min-height: 43px !important; margin-top: 2px; }
+        .pos-page .modal-content { border-radius: 11px; }
+        @media (max-width: 1120px) {
+            .pos-layout { grid-template-columns: minmax(0, 1fr); }
+            .current-sale-panel { order: 2; }
+            .products-panel { order: 1; }
+            .current-sale-panel { position: sticky; bottom: 0; z-index: 5; box-shadow: 0 -5px 18px rgba(16,42,67,.06); }
+            .pos-panel .table-responsive { max-height: min(42vh, 360px); overflow-y: auto; }
+        }
+        @media (max-width: 600px) {
+            .pos-page .main { padding: 18px 14px; }
+            .pos-page-header { align-items: flex-start; flex-direction: column; gap: 12px; }
+            .pos-page-header h2 { font-size: 23px; }
+            .pos-page-header > div:last-child { width: 100%; justify-content: space-between; }
+            .pos-panel { padding: 13px; }
+            .pos-toolbar input, .pos-toolbar select { flex: 1 1 100%; width: 100%; }
+            .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+            .product-image { height: 96px; }
+            .product-image img { max-height: 80px; }
+            .sale-item-details { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 9px; }
+            .current-sale-panel { position: static; }
+            .pos-panel .table-responsive { max-height: none; }
+        }
+        
+            .dashboard-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      
+      
+    }
+
+    .dashboard-logo-mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: #0f2747;
+      background:
+          linear-gradient(
+                    rgba(0, 0, 0, 0.326),
+                    rgba(0, 0, 0, 0.44)
+                ),
+          url("images/logo.png");
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 800;
+      box-shadow: 0 4px 12px rgba(15, 39, 71, 0.18);
+    }
+
+    .dashboard-logo-text {
+      line-height: 1.1;
+    }
+
+    .dashboard-logo-text strong {
+      display: block;
+      font-size: 16px;
+      color: #0f2747;
+    }
+
+    .dashboard-logo-text span {
+      display: block;
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 3px;
+      letter-spacing: .5px;
+    }
+
+        
+    </style>
+</head>
+
+<body class="pos-page">
+
+<div class="container">
+
+   
+
+    <aside class="sidebar">
+
+      <div class="dashboard-logo">
+
+        <div class="dashboard-logo-mark">
+          OG
+        </div>
+
+        <div class="dashboard-logo-text">
+          <strong>OGONG HARDWARE</strong>
+          <span>BUILT TOGETHER</span>
+        </div>
+
+      </div>
+
+      <div id="sidebar-nav"></div>
+
+    </aside>
+
+    <main class="main">
+
+        <!-- HEADER -->
+
+        <div class="pos-page-header">
+
+            <div>
+
+                <h2>Point of Sale</h2>
+
+                <p>
+                    Process physical store sales and transactions.
+                </p>
+
+            </div>
+
+            <div style="display:flex; gap:10px; align-items:center;">
+
+                <div class="cashier-info">
+
+                    <span>Cashier</span>
+
+                    <strong class="current-user"></strong>
+
+                </div>
+
+                <button
+                    class="button button-secondary"
+                    id="new-sale-btn"
+                    type="button"
+                >
+                    New Sale
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div id="alert-container"></div>
+
+
+        
+
+        <div
+            class="pos-layout"
+        >
+
+            <section class="table-card pos-panel products-panel">
+
+                <div class="header">
+
+                    <div>
+
+                        <h3>Product Showcase</h3>
+
+                        <p>
+                            Select a product to add it to the current sale.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="top-bar pos-toolbar"
+                >
+
+                    <input
+                        class="search-input"
+                        id="pos-search"
+                        type="text"
+                        placeholder="Search product name..."
+                    >
+
+
+                    <select
+                        id="pos-category"
+                        class="search-input"
+                    >
+
+                        <option value="">
+                            All Categories
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div
+                    id="product-grid"
+                    class="product-grid"
+                >
+
+
+                </div>
+
+            </section>
+
+
+
+            <section class="table-card pos-panel current-sale-panel">
+
+                <div class="header">
+
+                    <div>
+
+                        <h3>Current Sale</h3>
+
+                        <p>
+                            Items selected for this physical transaction.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="table-responsive">
+
+                    <table class="pos-cart-table">
+
+                        <thead>
+
+                            <tr>
+                                <th>Product</th>
+                                <th>Qty</th>
+                                <th>Cost</th>
+                                <th>Price</th>
+                                <th>Subtotal</th>
+                                <th>Profit</th>
+                                <th>Action</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="transaction-body">
+
+                            
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                
+
+                <div class="transaction-summary">
+
+                    <div class="summary-row">
+
+                        <span>
+                            Total Amount
+                        </span>
+
+                        <strong
+                            id="transaction-total"
+                            class="summary-total"
+                        >
+                            ₱0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="summary-row">
+
+                        <span>
+                            Change
+                        </span>
+
+                        <strong id="transaction-change">
+                            ₱0.00
+                        </strong>
+
+                    </div>
+                        <div class="pos-summary">
+
+                    <div class="summary-row">
+                         <span>Total Cost</span>
+                         <strong id="transaction-cost">
+                                  ₱0.00
+                 </strong>
+                    </div>
+
+                </div>
+
+
+                
+
+                <div class="payment-section">
+
+                    <h3>Payment</h3>
+
+
+                    <div class="form-group">
+
+                        <label for="payment-method">
+                            Payment Method
+                        </label>
+
+                        <select id="payment-method">
+
+                                <option value="Cash">
+                                     Cash
+                                 </option>
+
+                                <option value="GCash">
+                                    GCash
+                                </option>
+
+                                 <option value="Bank Transfer">
+                                    Bank Transfer
+                                </option>
+
+
+
+                    <div
+                        class="form-group"
+                        id="cash-fields"
+                    >
+
+                        <label for="amount-received">
+                            Amount Received
+                        </label>
+
+                        <input
+                            id="amount-received"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="Enter amount received"
+                        >
+
+                    </div>
+                           
+
+                            <div
+                                 class="form-group"
+                                 id="credit-fields"
+                                 style="display:none;"
+                                                        >
+
+                                 <label for="credit-customer-name">
+                                         Customer / Borrower Name
+                                 </label>
+
+                         <input
+                                id="credit-customer-name"
+                                    type="text"
+                                         placeholder="Enter customer name"
+                                            >
+
+                            </div>
+
+                    <button
+                        class="button button-primary complete-sale"
+                        id="complete-sale-btn"
+                        type="button"
+                    >
+                        Complete Sale
+                    </button>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+
+
+<div
+    class="modal"
+    id="quantity-modal"
+>
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2>
+                Add Product to Sale
+            </h2>
+
+            <button
+                class="modal-close"
+                type="button"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div id="qm-alert"></div>
+
+
+        <div class="form-group">
+
+            <h3 id="qm-product-name">
+                Product
+            </h3>
+
+            <p id="qm-product-stock">
+                Available: 0
+            </p>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="qm-quantity">
+                Quantity
+            </label>
+
+
+            <div
+                style="
+                    display:flex;
+                    gap:10px;
+                    align-items:center;
+                "
+            >
+
+                <button
+                    class="button button-secondary"
+                    id="qm-decrease"
+                    type="button"
+                >
+                    −
+                </button>
+
+
+                <input
+                    id="qm-quantity"
+                    type="number"
+                    min="1"
+                    value="1"
+                    style="
+                        text-align:center;
+                        max-width:100px;
+                    "
+                >
+
+
+                <button
+                    class="button button-secondary"
+                    id="qm-increase"
+                    type="button"
+                >
+                    +
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="top-bar">
+
+            <button
+                class="button button-primary"
+                id="qm-add-btn"
+                type="button"
+            >
+                Add to Sale
+            </button>
+
+
+            <button
+                class="button button-secondary"
+                type="button"
+                onclick="closeModal('quantity-modal')"
+            >
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+
+<div
+    class="modal"
+    id="receipt-modal"
+>
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2>
+                Sale Receipt
+            </h2>
+
+            <button
+                class="modal-close"
+                type="button"
+                onclick="closeModal('receipt-modal')"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div id="receipt-content"></div>
+
+
+        <div class="top-bar">
+
+            <button
+                class="button button-primary"
+                id="print-receipt-btn"
+                type="button"
+            >
+                Print Receipt
+            </button>
+
+
+            <button
+                class="button button-secondary"
+                id="receipt-new-sale-btn"
+                type="button"
+            >
+                New Sale
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script src="js/app.js"></script>
+
+<script src="js/pos.js"></script>
+
+
+<script>
+
+    const user = requireAuth();
+
+    if (!user) {
+
+        window.location.href = 'login.html';
+
+    } else {
+
+        renderSidebar('pos');
+
+        initPOS();
+
+    }
+
+</script>
+
+
+</body>
+
+</html>

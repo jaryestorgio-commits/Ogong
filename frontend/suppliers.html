@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suppliers - OGONG Hardware</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<style>
+  .dashboard-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      
+      
+    }
+
+    .dashboard-logo-mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: #0f2747;
+      background:
+          linear-gradient(
+                    rgba(0, 0, 0, 0.326),
+                    rgba(0, 0, 0, 0.44)
+                ),
+          url("images/logo.png");
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 800;
+      box-shadow: 0 4px 12px rgba(15, 39, 71, 0.18);
+    }
+
+    .dashboard-logo-text {
+      line-height: 1.1;
+    }
+
+    .dashboard-logo-text strong {
+      display: block;
+      font-size: 16px;
+      color: #0f2747;
+    }
+
+    .dashboard-logo-text span {
+      display: block;
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 3px;
+      letter-spacing: .5px;
+    }
+</style>
+<body>
+
+<div class="container">
+
+  <aside class="sidebar">
+
+      <div class="dashboard-logo">
+
+        <div class="dashboard-logo-mark">
+          OG
+        </div>
+
+        <div class="dashboard-logo-text">
+          <strong>OGONG HARDWARE</strong>
+          <span>BUILT TOGETHER</span>
+        </div>
+
+      </div>
+
+      <div id="sidebar-nav"></div>
+
+    </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div>
+        <h2>Suppliers</h2>
+        <p>Manage supplier information and contacts.</p>
+      </div>
+
+      <button
+        class="button button-primary"
+        id="add-supplier-btn"
+        type="button"
+      >
+        Add Supplier
+      </button>
+    </div>
+
+    <div id="alert-container"></div>
+
+    <!-- SEARCH -->
+    <div class="top-bar">
+
+      <input
+        class="search-input"
+        id="supplier-search"
+        type="text"
+        placeholder="Search suppliers..."
+      >
+
+      <button
+        class="button button-secondary"
+        id="supplier-search-btn"
+        type="button"
+      >
+        Search
+      </button>
+
+      <button
+        class="button button-secondary"
+        id="supplier-refresh-btn"
+        type="button"
+      >
+        Refresh
+      </button>
+
+    </div>
+
+    <!-- SUPPLIERS TABLE -->
+    <div class="table-card">
+
+      <div class="table-responsive">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Supplier Name</th>
+              <th>Contact Person</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Address</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody id="suppliers-table-body"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+
+<!-- ==============================
+     SUPPLIER MODAL
+     ============================== -->
+
+<div class="modal" id="supplier-modal">
+
+  <div class="modal-content">
+
+    <div class="modal-header">
+
+      <h2 id="supplier-modal-title">
+        Add Supplier
+      </h2>
+
+      <button
+        class="modal-close"
+        type="button"
+        id="supplier-modal-close"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div id="supplier-modal-alert"></div>
+
+    <!-- SUPPLIER NAME -->
+    <div class="form-group">
+
+      <label for="supplier-name">
+        Supplier Name *
+      </label>
+
+      <input
+        id="supplier-name"
+        type="text"
+        placeholder="Enter supplier name"
+        maxlength="150"
+      >
+
+    </div>
+
+    <!-- CONTACT PERSON -->
+    <div class="form-group">
+
+      <label for="supplier-contact">
+        Contact Person
+      </label>
+
+      <input
+        id="supplier-contact"
+        type="text"
+        placeholder="Enter contact person"
+        maxlength="150"
+      >
+
+    </div>
+
+    <!-- PHONE -->
+    <div class="form-group">
+
+      <label for="supplier-phone">
+        Phone Number
+      </label>
+
+      <input
+        id="supplier-phone"
+        type="tel"
+        placeholder="Enter phone number"
+        maxlength="30"
+      >
+
+    </div>
+
+    <!-- EMAIL -->
+    <div class="form-group">
+
+      <label for="supplier-email">
+        Email
+      </label>
+
+      <input
+        id="supplier-email"
+        type="email"
+        placeholder="Enter email address"
+        maxlength="150"
+      >
+
+    </div>
+
+    <!-- ADDRESS -->
+    <div class="form-group">
+
+      <label for="supplier-address">
+        Address
+      </label>
+
+      <textarea
+        id="supplier-address"
+        rows="3"
+        placeholder="Enter supplier address"
+        maxlength="300"
+      ></textarea>
+
+    </div>
+
+    <!-- BUTTONS -->
+    <div class="top-bar">
+
+      <button
+        class="button button-primary"
+        id="save-supplier-btn"
+        type="button"
+      >
+        Save Supplier
+      </button>
+
+      <button
+        class="button button-secondary"
+        id="cancel-supplier-btn"
+        type="button"
+      >
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- JAVASCRIPT -->
+
+<script src="js/app.js"></script>
+
+<script>
+
+let editingSupplierId = null;
+
+const user = requireAuth();
+
+if (!user) {
+
+  window.location.href = 'login.html';
+
+} else {
+
+  renderSidebar('suppliers');
+  renderTopbar();
+
+}
+
+
+/* ==============================
+   OPEN MODAL
+   ============================== */
+
+function openSupplierModal(supplier = null) {
+
+  editingSupplierId = supplier ? supplier.id : null;
+
+  document.getElementById(
+    'supplier-modal-title'
+  ).textContent = supplier
+    ? 'Edit Supplier'
+    : 'Add Supplier';
+
+  document.getElementById('supplier-name').value =
+    supplier?.supplier_name || '';
+
+  document.getElementById('supplier-contact').value =
+    supplier?.contact_person || '';
+
+  document.getElementById('supplier-phone').value =
+    supplier?.phone || '';
+
+  document.getElementById('supplier-email').value =
+    supplier?.email || '';
+
+  document.getElementById('supplier-address').value =
+    supplier?.address || '';
+
+  document.getElementById(
+    'supplier-modal-alert'
+  ).innerHTML = '';
+
+  openModal('supplier-modal');
+
+}
+
+
+/* ==============================
+   CLOSE MODAL
+   ============================== */
+
+function closeSupplierModal() {
+
+  closeModal('supplier-modal');
+
+  editingSupplierId = null;
+
+  document.getElementById(
+    'supplier-modal-title'
+  ).textContent = 'Add Supplier';
+
+  document.getElementById('supplier-name').value = '';
+  document.getElementById('supplier-contact').value = '';
+  document.getElementById('supplier-phone').value = '';
+  document.getElementById('supplier-email').value = '';
+  document.getElementById('supplier-address').value = '';
+
+  document.getElementById(
+    'supplier-modal-alert'
+  ).innerHTML = '';
+
+}
+
+
+/* ==============================
+   LOAD SUPPLIERS
+   ============================== */
+
+async function loadSuppliers(search = '') {
+
+  const tbody =
+    document.getElementById(
+      'suppliers-table-body'
+    );
+
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="7" style="text-align:center;">
+        Loading suppliers...
+      </td>
+    </tr>
+  `;
+
+  try {
+
+    const endpoint =
+      search
+        ? `/suppliers?search=${encodeURIComponent(search)}`
+        : '/suppliers';
+
+    const suppliers =
+      await apiFetch(endpoint);
+
+    tbody.innerHTML = '';
+
+    if (!suppliers || suppliers.length === 0) {
+
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" style="text-align:center;">
+            No suppliers found.
+          </td>
+        </tr>
+      `;
+
+      return;
+
+    }
+
+
+    suppliers.forEach(supplier => {
+
+      const row =
+        document.createElement('tr');
+
+      row.innerHTML = `
+
+        <td>
+          ${supplier.id}
+        </td>
+
+        <td>
+          <strong>
+            ${escapeHtml(supplier.supplier_name)}
+          </strong>
+        </td>
+
+        <td>
+          ${escapeHtml(
+            supplier.contact_person || '—'
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            supplier.phone || '—'
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            supplier.email || '—'
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            supplier.address || '—'
+          )}
+        </td>
+
+        <td>
+
+          <button
+            class="button button-secondary"
+            type="button"
+            onclick="editSupplier(${supplier.id})"
+          >
+            Edit
+          </button>
+
+          <button
+            class="button button-danger"
+            type="button"
+            onclick="deleteSupplier(${supplier.id})"
+          >
+            Delete
+          </button>
+
+        </td>
+
+      `;
+
+      tbody.appendChild(row);
+
+    });
+
+  } catch (error) {
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align:center;">
+          Unable to load suppliers.
+        </td>
+      </tr>
+    `;
+
+    showAlert(
+      error.message || 'Unable to load suppliers.',
+      'danger'
+    );
+
+  }
+
+}
+
+
+/* ==============================
+   EDIT SUPPLIER
+   ============================== */
+
+async function editSupplier(id) {
+
+  try {
+
+    const suppliers =
+      await apiFetch('/suppliers');
+
+    const supplier =
+      suppliers.find(
+        item => Number(item.id) === Number(id)
+      );
+
+    if (!supplier) {
+
+      throw new Error(
+        'Supplier not found.'
+      );
+
+    }
+
+    openSupplierModal(supplier);
+
+  } catch (error) {
+
+    showAlert(
+      error.message,
+      'danger'
+    );
+
+  }
+
+}
+
+
+/* ==============================
+   DELETE SUPPLIER
+   ============================== */
+
+async function deleteSupplier(id) {
+
+  const confirmed =
+    confirm(
+      'Are you sure you want to delete this supplier?'
+    );
+
+  if (!confirmed) return;
+
+  try {
+
+    await apiFetch(
+      `/suppliers/${id}`,
+      {
+        method: 'DELETE'
+      }
+    );
+
+    showAlert(
+      'Supplier deleted successfully.',
+      'success'
+    );
+
+    await loadSuppliers(
+      document
+        .getElementById('supplier-search')
+        .value
+        .trim()
+    );
+
+  } catch (error) {
+
+    showAlert(
+      error.message,
+      'danger'
+    );
+
+  }
+
+}
+
+
+/* ==============================
+   SAVE SUPPLIER
+   ============================== */
+
+async function saveSupplier() {
+
+  const supplier = {
+
+    supplier_name:
+      document
+        .getElementById('supplier-name')
+        .value
+        .trim(),
+
+    contact_person:
+      document
+        .getElementById('supplier-contact')
+        .value
+        .trim(),
+
+    phone:
+      document
+        .getElementById('supplier-phone')
+        .value
+        .trim(),
+
+    email:
+      document
+        .getElementById('supplier-email')
+        .value
+        .trim(),
+
+    address:
+      document
+        .getElementById('supplier-address')
+        .value
+        .trim()
+
+  };
+
+
+  /* REQUIRED FIELD */
+
+  if (!supplier.supplier_name) {
+
+    document.getElementById(
+      'supplier-modal-alert'
+    ).innerHTML = `
+      <div class="alert alert-danger">
+        Supplier name is required.
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  /* EMAIL VALIDATION */
+
+  if (
+    supplier.email &&
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+      supplier.email
+    )
+  ) {
+
+    document.getElementById(
+      'supplier-modal-alert'
+    ).innerHTML = `
+      <div class="alert alert-danger">
+        Please enter a valid email address.
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  const saveButton =
+    document.getElementById(
+      'save-supplier-btn'
+    );
+
+  saveButton.disabled = true;
+
+  saveButton.textContent =
+    editingSupplierId
+      ? 'Updating...'
+      : 'Saving...';
+
+
+  try {
+
+    if (editingSupplierId) {
+
+      await apiFetch(
+        `/suppliers/${editingSupplierId}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(supplier)
+        }
+      );
+
+      showAlert(
+        'Supplier updated successfully.',
+        'success'
+      );
+
+    } else {
+
+      await apiFetch(
+        '/suppliers',
+        {
+          method: 'POST',
+          body: JSON.stringify(supplier)
+        }
+      );
+
+      showAlert(
+        'Supplier added successfully.',
+        'success'
+      );
+
+    }
+
+    closeSupplierModal();
+
+    await loadSuppliers(
+      document
+        .getElementById('supplier-search')
+        .value
+        .trim()
+    );
+
+  } catch (error) {
+
+    document.getElementById(
+      'supplier-modal-alert'
+    ).innerHTML = `
+      <div class="alert alert-danger">
+        ${escapeHtml(
+          error.message ||
+          'Unable to save supplier.'
+        )}
+      </div>
+    `;
+
+  } finally {
+
+    saveButton.disabled = false;
+
+    saveButton.textContent =
+      'Save Supplier';
+
+  }
+
+}
+
+
+/* ==============================
+   ESCAPE HTML
+   ============================== */
+
+function escapeHtml(value) {
+
+  const div =
+    document.createElement('div');
+
+  div.textContent =
+    value == null ? '' : String(value);
+
+  return div.innerHTML;
+
+}
+
+
+/* ==============================
+   EVENTS
+   ============================== */
+
+document
+  .getElementById('add-supplier-btn')
+  .addEventListener(
+    'click',
+    () => openSupplierModal()
+  );
+
+
+document
+  .getElementById('supplier-modal-close')
+  .addEventListener(
+    'click',
+    closeSupplierModal
+  );
+
+
+document
+  .getElementById('cancel-supplier-btn')
+  .addEventListener(
+    'click',
+    closeSupplierModal
+  );
+
+
+document
+  .getElementById('save-supplier-btn')
+  .addEventListener(
+    'click',
+    saveSupplier
+  );
+
+
+document
+  .getElementById('supplier-search-btn')
+  .addEventListener(
+    'click',
+    () => {
+
+      const search =
+        document
+          .getElementById('supplier-search')
+          .value
+          .trim();
+
+      loadSuppliers(search);
+
+    }
+  );
+
+
+document
+  .getElementById('supplier-refresh-btn')
+  .addEventListener(
+    'click',
+    () => {
+
+      document
+        .getElementById('supplier-search')
+        .value = '';
+
+      loadSuppliers();
+
+    }
+  );
+
+
+/* ENTER TO SEARCH */
+
+document
+  .getElementById('supplier-search')
+  .addEventListener(
+    'keydown',
+    event => {
+
+      if (event.key === 'Enter') {
+
+        document
+          .getElementById(
+            'supplier-search-btn'
+          )
+          .click();
+
+      }
+
+    }
+  );
+
+
+/* ESC TO CLOSE MODAL */
+
+document.addEventListener(
+  'keydown',
+  event => {
+
+    if (
+      event.key === 'Escape'
+    ) {
+
+      closeSupplierModal();
+
+    }
+
+  }
+);
+
+
+/* INITIAL LOAD */
+
+loadSuppliers();
+
+</script>
+
+</body>
+</html>

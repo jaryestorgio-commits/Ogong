@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Ogong Hardware Login</title>
+  <link rel="stylesheet" href="css/styles.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #edf3f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-page {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 25px;
+    }
+
+    .login-box {
+      width: 940px;
+      max-width: 100%;
+      min-height: 540px;
+      background: white;
+      border: 1px solid #dbe5f0;
+      border-radius: 16px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      box-shadow: 0 24px 60px rgba(27, 57, 89, 0.12);
+    }
+
+    /* LOGIN */
+
+    .login-side {
+      padding: 58px 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: #fff;
+      z-index: 2;
+    }
+
+    .back-link {
+      align-self: flex-start;
+      margin-bottom: 24px;
+      color: #58718d;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .back-link:hover {
+      color: #1769e0;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 42px;
+    }
+
+    .logo-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      background: #123c6a;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 25px;
+    }
+
+    .logo-text strong {
+      display: block;
+      font-size: 19px;
+      color: #102d4f;
+    }
+
+    .logo-text span {
+      display: block;
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 3px;
+    }
+
+    .login-side h1 {
+      margin: 0;
+      font-size: 30px;
+      letter-spacing: -0.4px;
+      color: #102d4f;
+    }
+
+    .login-side > p {
+      color: #61748b;
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 10px 0 32px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #294563;
+      margin-bottom: 8px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #8092a8;
+    }
+
+    .login-input {
+      width: 100%;
+      height: 50px;
+      border: 1px solid #d5e0eb;
+      border-radius: 8px;
+      outline: none;
+      padding: 0 44px;
+      font-size: 14px;
+      color: #163452;
+      background: #f8fafc;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+    }
+
+    .login-input:focus {
+      border-color: #2c78c9;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(44, 120, 201, .12);
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 0;
+      padding: 4px;
+      color: #58718d;
+      background: transparent;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .password-toggle:hover {
+      color: #1769e0;
+    }
+
+    .login-button {
+      width: 100%;
+      height: 50px;
+      margin-top: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #1769e0;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .login-button:hover {
+      background: #0d56bd;
+      transform: translateY(-1px);
+    }
+
+    .login-button:disabled {
+      opacity: .7;
+      cursor: not-allowed;
+    }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 22px;
+      color: #8192a5;
+      font-size: 11px;
+    }
+
+    .auth-switch {
+      margin-top: 20px;
+      color: #71859a;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .auth-switch button {
+      border: 0;
+      padding: 0;
+      color: #1769e0;
+      background: transparent;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .auth-panel.hidden {
+      display: none;
+    }
+
+    .signup-heading {
+      margin-bottom: 25px;
+    }
+
+    /* WELCOME */
+
+    .welcome-side {
+      position: relative;
+      background: #102d4f;
+      color: white;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+    }
+
+    .welcome-side::before {
+      content: "";
+      position: absolute;
+      left: -155px;
+      top: -80px;
+      width: 250px;
+      height: 650px;
+      background: #f5f8fc;
+      transform: skewX(-25deg);
+    }
+
+    .welcome-content {
+      position: relative;
+      z-index: 2;
+      margin-left: 55px;
+      max-width: 300px;
+    }
+
+    .welcome-logo {
+      width: 70px;
+      height: 70px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 35px;
+      margin-bottom: 22px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .welcome-content h2 {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.1;
+    }
+
+    .welcome-content p {
+      color: #cbd5e1;
+      font-size: 13px;
+      line-height: 1.7;
+      margin-top: 18px;
+    }
+
+    .system-badge {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 7px 12px;
+      border-radius: 20px;
+      background: rgba(23,105,224,.2);
+      color: #93c5fd;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-7px);
+      }
+    }
+
+    #alert-container {
+      margin-bottom: 10px;
+    }
+
+    #alert-container .alert {
+      font-size: 13px;
+      padding: 11px 13px;
+    }
+
+    @media (max-width: 700px) {
+
+      body {
+        overflow: auto;
+      }
+
+      .login-box {
+        grid-template-columns: 1fr;
+      }
+
+      .welcome-side {
+        order: -1;
+        min-height: 230px;
+      }
+
+      .welcome-side::before {
+        display: none;
+      }
+
+      .welcome-content {
+        margin-left: 0;
+        text-align: center;
+      }
+
+      .welcome-logo {
+        margin: 0 auto 15px;
+      }
+
+      .welcome-content h2 {
+        font-size: 28px;
+      }
+
+      .login-side {
+        padding: 35px 28px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="login-page">
+
+  <div class="login-box">
+    <div class="login-side">
+
+      <a class="back-link" href="index.html">&larr; Back</a>
+
+      <div class="logo">
+        <div class="logo-icon">🏠</div>
+
+        <div class="logo-text">
+          <strong>Ogong Hardware</strong>
+          <span>Hardware Management System</span>
+        </div>
+      </div>
+
+      <div class="auth-panel" id="loginPanel">
+        <h1>Login</h1>
+
+      <p>
+        Sign in to access the Ogong Hardware
+        Management and POS System.
+      </p>
+
+      <div id="alert-container"></div>
+
+      <div class="form-group">
+        <label for="username">
+          Username
+        </label>
+
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+
+          <input
+            id="username"
+            class="login-input"
+            type="text"
+            placeholder="Username"
+            autocomplete="username"
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">
+          Password
+        </label>
+
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+
+          <input
+            id="password"
+            class="login-input"
+            type="password"
+            placeholder="Password"
+            autocomplete="current-password"
+          >
+
+          <button
+            class="password-toggle"
+            id="togglePassword"
+            type="button"
+            aria-label="Show password"
+          >Show</button>
+        </div>
+      </div>
+
+      <button
+        class="login-button"
+        id="loginBtn"
+        type="button"
+      >
+        Login
+      </button>
+
+        <div class="login-footer">
+          Authorized Ogong Hardware personnel only.
+        </div>
+
+        <div class="auth-switch">
+          Don't have an account?
+          <button id="showSignup" type="button">Sign Up</button>
+        </div>
+      </div>
+
+      <div class="auth-panel hidden" id="signupPanel">
+        <h1 class="signup-heading">Create account</h1>
+
+        <div class="form-group">
+          <label for="signupName">Full Name</label>
+          <input id="signupName" class="login-input" type="text" placeholder="Full name" autocomplete="name">
+        </div>
+
+        <div class="form-group">
+          <label for="signupUsername">Username</label>
+          <input id="signupUsername" class="login-input" type="text" placeholder="Username" autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label for="signupEmail">Email</label>
+          <input id="signupEmail" class="login-input" type="email" placeholder="name@example.com" autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label for="signupPassword">Password</label>
+          <input id="signupPassword" class="login-input" type="password" placeholder="At least 8 characters" autocomplete="new-password">
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input id="confirmPassword" class="login-input" type="password" placeholder="Repeat password" autocomplete="new-password">
+        </div>
+
+        <button class="login-button" id="signupBtn" type="button">Sign Up</button>
+
+        <div class="auth-switch">
+          Already have an account?
+          <button id="showLogin" type="button">Sign In</button>
+        </div>
+      </div>
+
+    </div>
+
+
+  
+    <div class="welcome-side">
+
+      <div class="welcome-content">
+
+        <div class="welcome-logo">
+          🏠
+        </div>
+
+        <h2>
+          WELCOME<br>
+          BACK!
+        </h2>
+
+        <p>
+          Manage products, inventory, sales,
+          suppliers and store transactions
+          with the Ogong Hardware Management System.
+        </p>
+
+        <span class="system-badge">
+          PHYSICAL STORE POS SYSTEM
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script src="js/app.js"></script>
+
+<script>
+
+  const loginBtn =
+    document.getElementById('loginBtn');
+
+  const username =
+    document.getElementById('username');
+
+  const password =
+    document.getElementById('password');
+
+  const togglePassword =
+    document.getElementById('togglePassword');
+
+  const loginPanel = document.getElementById('loginPanel');
+  const signupPanel = document.getElementById('signupPanel');
+  const signupBtn = document.getElementById('signupBtn');
+  const signupName = document.getElementById('signupName');
+  const signupUsername = document.getElementById('signupUsername');
+  const signupEmail = document.getElementById('signupEmail');
+  const signupPassword = document.getElementById('signupPassword');
+  const confirmPassword = document.getElementById('confirmPassword');
+
+  document.getElementById('showSignup').addEventListener('click', function() {
+    loginPanel.classList.add('hidden');
+    signupPanel.classList.remove('hidden');
+    signupName.focus();
+  });
+
+  document.getElementById('showLogin').addEventListener('click', function() {
+    signupPanel.classList.add('hidden');
+    loginPanel.classList.remove('hidden');
+    username.focus();
+  });
+
+  togglePassword.addEventListener(
+    'click',
+    function() {
+      const isPassword = password.type === 'password';
+      password.type = isPassword ? 'text' : 'password';
+      togglePassword.textContent = isPassword ? 'Hide' : 'Show';
+      togglePassword.setAttribute(
+        'aria-label',
+        isPassword ? 'Hide password' : 'Show password'
+      );
+    }
+  );
+
+
+  async function doLogin() {
+
+    const usernameValue =
+      username.value.trim();
+
+    const passwordValue =
+      password.value.trim();
+
+
+    if (!usernameValue || !passwordValue) {
+
+      showAlert(
+        'Please enter username and password.',
+        'danger'
+      );
+
+      return;
+    }
+
+
+    loginBtn.disabled = true;
+
+    loginBtn.textContent =
+      'Logging in...';
+
+
+    try {
+
+      const result = await apiFetch(
+        '/login',
+        {
+          method: 'POST',
+
+          body: JSON.stringify({
+            username: usernameValue,
+            password: passwordValue
+          })
+        }
+      );
+
+
+      setStoredUser(result);
+
+      window.location.href =
+        'dashboard.html';
+
+
+    } catch (error) {
+
+      showAlert(
+        error.message ||
+        'Invalid username or password.',
+        'danger'
+      );
+
+      loginBtn.disabled = false;
+
+      loginBtn.textContent =
+        'Login';
+    }
+  }
+
+
+  loginBtn.addEventListener(
+    'click',
+    doLogin
+  );
+
+  async function doSignup() {
+    const nameValue = signupName.value.trim();
+    const usernameValue = signupUsername.value.trim();
+    const emailValue = signupEmail.value.trim();
+    const passwordValue = signupPassword.value;
+
+    if (!nameValue || !usernameValue || !emailValue || !passwordValue || !confirmPassword.value) {
+      showAlert('Please complete all registration fields.', 'danger');
+      return;
+    }
+    if (passwordValue !== confirmPassword.value) {
+      showAlert('Passwords do not match.', 'danger');
+      return;
+    }
+
+    signupBtn.disabled = true;
+    signupBtn.textContent = 'Creating account...';
+    try {
+      await apiFetch('/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: nameValue,
+          username: usernameValue,
+          email: emailValue,
+          password: passwordValue
+        })
+      });
+      signupPanel.classList.add('hidden');
+      loginPanel.classList.remove('hidden');
+      username.value = usernameValue;
+      password.value = '';
+      showAlert('Account created successfully. Please sign in.', 'success');
+      password.focus();
+    } catch (error) {
+      showAlert(error.message || 'Unable to create account.', 'danger');
+    } finally {
+      signupBtn.disabled = false;
+      signupBtn.textContent = 'Sign Up';
+    }
+  }
+
+  signupBtn.addEventListener('click', doSignup);
+
+
+  password.addEventListener(
+    'keydown',
+    function(event) {
+
+      if (event.key === 'Enter') {
+        doLogin();
+      }
+
+    }
+  );
+
+
+  username.addEventListener(
+    'keydown',
+    function(event) {
+
+      if (event.key === 'Enter') {
+        password.focus();
+      }
+
+    }
+  );
+
+</script>
+
+</body>
+</html>
