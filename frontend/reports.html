@@ -62,7 +62,7 @@
     <div class="report-filter-fields" hidden><input id="report-start" type="date"><input id="report-end" type="date"></div>
   </main>
 </div>
-<script src="js/app.js"></script>
+<script src="js/app.js?v=render-api-1"></script>
 <script>
 const user = requireAuth(); if (!user) { window.location.href = 'login.html'; } else { renderSidebar('reports'); }
 let currentPeriod = 'yearly'; let reportData = { sales: [], products: [], details: [] }; const colors = ['#1769e0','#35a66a','#e1a52b','#cc5d6e'];

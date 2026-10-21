@@ -1,27 +1,15 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 BASE_DIR = Path(__file__).resolve().parent.parent
-DEFAULT_DB_PATH = BASE_DIR / 'ogong_hardware.db'
+load_dotenv(BASE_DIR / ".env")
 
-def get_database_path():
-    configured_name = os.environ.get('OGONG_DB_NAME')
-    configured_path = os.environ.get('OGONG_DB_PATH')
-
-    if configured_path:
-        return configured_path
-
-    if configured_name:
-        if os.path.isabs(configured_name):
-            return configured_name
-        return str(BASE_DIR / configured_name)
-
-    return str(DEFAULT_DB_PATH)
-
-
+DATABASE_URL = os.environ.get("DATABASE_URL", "").strip() or None
 DB_CONFIG = {
-    'database': get_database_path(),
-    'timeout': 30,
+    "database_url": DATABASE_URL,
+    "connect_timeout": 10,
 }
 
-SECRET_KEY = os.environ.get('OGONG_SECRET_KEY', 'ogongsecret')
+SECRET_KEY = os.environ.get("OGONG_SECRET_KEY")

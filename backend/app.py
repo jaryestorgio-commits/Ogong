@@ -1,17 +1,42 @@
+import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import sqlite3
 import hashlib
 import hmac
 import secrets
-from config import DB_CONFIG
+from datetime import date, datetime
+from decimal import Decimal
+import psycopg
+from psycopg.rows import dict_row
+from dotenv import load_dotenv
+
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+from config import DB_CONFIG, SECRET_KEY
 
 app = Flask(__name__, static_folder='../frontend', static_url_path='')
+app.config['SECRET_KEY'] = SECRET_KEY
 CORS(app)
 
 
 def rows_to_list(rows):
-    return [dict(row) for row in rows]
+    return [json_safe(dict(row)) for row in rows]
+
+
+def json_safe(value):
+    if isinstance(value, Decimal):
+        return float(value)
+    if isinstance(value, datetime):
+        return value.isoformat(sep=' ')
+    if isinstance(value, date):
+        return value.isoformat()
+    if isinstance(value, dict):
+        return {key: json_safe(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [json_safe(item) for item in value]
+    return value
 
 
 @app.route('/test_db')
@@ -19,12 +44,17 @@ def test_db():
     try:
         conn = get_connection()
         cur = conn.cursor()
-        cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name")
+        cur.execute(
+            "SELECT table_name FROM information_schema.tables "
+            "WHERE table_schema = current_schema() AND table_type = 'BASE TABLE' "
+            "ORDER BY table_name"
+        )
         tables = cur.fetchall()
         conn.close()
-        return jsonify({"status": "success", "tables": [row[0] for row in tables]})
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)})
+        return jsonify({"status": "success", "tables": [row['table_name'] for row in tables]})
+    except (psycopg.Error, RuntimeError):
+        app.logger.exception('PostgreSQL connectivity check failed.')
+        return jsonify({"status": "error", "message": "Database connection failed."}), 500
 
 
 @app.route('/')
@@ -40,15 +70,20 @@ def handle_404(error):
 
 
 def get_connection():
-    conn = sqlite3.connect(DB_CONFIG['database'], timeout=DB_CONFIG.get('timeout', 30))
-    conn.row_factory = sqlite3.Row
-    conn.execute('PRAGMA foreign_keys = ON')
-    return conn
+    database_url = DB_CONFIG['database_url']
+    if not database_url:
+        raise RuntimeError('DATABASE_URL is required to connect to PostgreSQL.')
+    return psycopg.connect(
+        database_url,
+        connect_timeout=DB_CONFIG['connect_timeout'],
+        row_factory=dict_row
+    )
 
 
-@app.errorhandler(sqlite3.Error)
+@app.errorhandler(psycopg.Error)
 def handle_db_error(error):
-    return jsonify({'message': 'Database connection failed. Check SQLite database and backend config.', 'error': str(error)}), 500
+    app.logger.error('PostgreSQL operation failed: %s', error)
+    return jsonify({'message': 'Database operation failed. Check PostgreSQL configuration.'}), 500
 
 
 def hash_password(password):
@@ -81,7 +116,7 @@ def login():
     conn = get_connection()
     try:
         cursor = conn.cursor()
-        cursor.execute('SELECT id, name, username, role, password FROM users WHERE username=?', (username,))
+        cursor.execute('SELECT id, name, username, role, password FROM users WHERE username=%s', (username,))
         user = cursor.fetchone()
         if not user or not verify_password(password, user['password']):
             return jsonify({'message': 'Invalid credentials.'}), 401
@@ -112,19 +147,16 @@ def register():
     conn = get_connection()
     try:
         cursor = conn.cursor()
-        columns = {row['name'] for row in cursor.execute('PRAGMA table_info(users)')}
-        if 'email' not in columns:
-            cursor.execute('ALTER TABLE users ADD COLUMN email TEXT')
-        cursor.execute('SELECT 1 FROM users WHERE username=? OR lower(email)=?', (username, email))
+        cursor.execute('SELECT 1 FROM users WHERE username=%s OR lower(email)=%s', (username, email))
         if cursor.fetchone():
             return jsonify({'message': 'Username or email already exists.'}), 409
         cursor.execute(
-            'INSERT INTO users (name, username, email, password, role) VALUES (?, ?, ?, ?, ?)',
+            'INSERT INTO users (name, username, email, password, role) VALUES (%s, %s, %s, %s, %s)',
             (name, username, email, hash_password(password), 'STAFF')
         )
         conn.commit()
         return jsonify({'message': 'Account created successfully.'}), 201
-    except sqlite3.IntegrityError:
+    except psycopg.IntegrityError:
         conn.rollback()
         return jsonify({'message': 'Username or email already exists.'}), 409
     finally:
@@ -157,12 +189,12 @@ def create_user():
     try:
         cursor = conn.cursor()
         cursor.execute(
-            'INSERT INTO users (name, username, password, role) VALUES (?, ?, ?, ?)',
+            'INSERT INTO users (name, username, password, role) VALUES (%s, %s, %s, %s)',
             (name, username, password, role)
         )
         conn.commit()
         return jsonify({'message': 'User created.'}), 201
-    except sqlite3.IntegrityError:
+    except psycopg.IntegrityError:
         conn.rollback()
         return jsonify({'message': 'Username already exists.'}), 400
     finally:
@@ -184,17 +216,17 @@ def update_user(user_id):
         cursor = conn.cursor()
         if password:
             cursor.execute(
-                'UPDATE users SET name=?, username=?, password=?, role=? WHERE id=?',
+                'UPDATE users SET name=%s, username=%s, password=%s, role=%s WHERE id=%s',
                 (name, username, password, role, user_id)
             )
         else:
             cursor.execute(
-                'UPDATE users SET name=?, username=?, role=? WHERE id=?',
+                'UPDATE users SET name=%s, username=%s, role=%s WHERE id=%s',
                 (name, username, role, user_id)
             )
         conn.commit()
         return jsonify({'message': 'User updated.'})
-    except sqlite3.IntegrityError:
+    except psycopg.IntegrityError:
         conn.rollback()
         return jsonify({'message': 'Username already exists.'}), 400
     finally:
@@ -206,7 +238,7 @@ def delete_user(user_id):
     conn = get_connection()
     try:
         cursor = conn.cursor()
-        cursor.execute('DELETE FROM users WHERE id=?', (user_id,))
+        cursor.execute('DELETE FROM users WHERE id=%s', (user_id,))
         conn.commit()
         return jsonify({'message': 'User deleted.'})
     finally:
@@ -235,7 +267,7 @@ def create_category():
     conn = get_connection()
     try:
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO categories (category_name) VALUES (?)', (category_name,))
+        cursor.execute('INSERT INTO categories (category_name) VALUES (%s)', (category_name,))
         conn.commit()
         return jsonify({'message': 'Category created.'}), 201
     finally:
@@ -252,7 +284,7 @@ def update_category(category_id):
     conn = get_connection()
     try:
         cursor = conn.cursor()
-        cursor.execute('UPDATE categories SET category_name=? WHERE id=?', (category_name, category_id))
+        cursor.execute('UPDATE categories SET category_name=%s WHERE id=%s', (category_name, category_id))
         conn.commit()
         return jsonify({'message': 'Category updated.'})
     finally:
@@ -264,7 +296,7 @@ def delete_category(category_id):
     conn = get_connection()
     try:
         cursor = conn.cursor()
-        cursor.execute('DELETE FROM categories WHERE id=?', (category_id,))
+        cursor.execute('DELETE FROM categories WHERE id=%s', (category_id,))
         conn.commit()
         return jsonify({'message': 'Category deleted.'})
     finally:
@@ -298,7 +330,7 @@ def create_supplier():
     try:
         cursor = conn.cursor()
         cursor.execute(
-            'INSERT INTO suppliers (supplier_name, contact_person, phone, email, address) VALUES (?, ?, ?, ?, ?)',
+            'INSERT INTO suppliers (supplier_name, contact_person, phone, email, address) VALUES (%s, %s, %s, %s, %s)',
             (supplier_name, contact_person, phone, email, address)
         )
         conn.commit()
@@ -322,7 +354,7 @@ def update_supplier(supplier_id):
     try:
         cursor = conn.cursor()
         cursor.execute(
-            'UPDATE suppliers SET supplier_name=?, contact_person=?, phone=?, email=?, address=? WHERE id=?',
+            'UPDATE suppliers SET supplier_name=%s, contact_person=%s, phone=%s, email=%s, address=%s WHERE id=%s',
             (supplier_name, contact_person, phone, email, address, supplier_id)
         )
         conn.commit()
@@ -336,7 +368,7 @@ def delete_supplier(supplier_id):
     conn = get_connection()
     try:
         cursor = conn.cursor()
-        cursor.execute('DELETE FROM suppliers WHERE id=?', (supplier_id,))
+        cursor.execute('DELETE FROM suppliers WHERE id=%s', (supplier_id,))
         conn.commit()
         return jsonify({'message': 'Supplier deleted.'})
     finally:
@@ -370,9 +402,9 @@ def get_products():
         if search:
             query += '''
                 WHERE
-                    p.product_name LIKE ?
-                    OR c.category_name LIKE ?
-                    OR s.supplier_name LIKE ?
+                    p.product_name LIKE %s
+                    OR c.category_name LIKE %s
+                    OR s.supplier_name LIKE %s
             '''
             term = f'%{search}%'
             params = [term, term, term]
@@ -405,12 +437,12 @@ def get_product(product_id):
             FROM products p
             JOIN categories c ON p.category_id = c.id
             JOIN suppliers s ON p.supplier_id = s.id
-            WHERE p.id = ?
+            WHERE p.id = %s
         ''', (product_id,))
         product = cursor.fetchone()
         if not product:
             return jsonify({'message': 'Product not found.'}), 404
-        return jsonify(dict(product))
+        return jsonify(json_safe(dict(product)))
     finally:
         conn.close()
 
@@ -441,7 +473,7 @@ def create_product():
                 cost,
                 stock_quantity,
                 reorder_level
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s)
         ''', (product_name, category_id, supplier_id, price, cost, stock_quantity, reorder_level or 0))
         conn.commit()
         return jsonify({'message': 'Product created.'}), 201
@@ -469,14 +501,14 @@ def update_product(product_id):
         cursor.execute('''
             UPDATE products
             SET
-                product_name = ?,
-                category_id = ?,
-                supplier_id = ?,
-                price = ?,
-                cost = ?,
-                stock_quantity = ?,
-                reorder_level = ?
-            WHERE id = ?
+                product_name = %s,
+                category_id = %s,
+                supplier_id = %s,
+                price = %s,
+                cost = %s,
+                stock_quantity = %s,
+                reorder_level = %s
+            WHERE id = %s
         ''', (product_name, category_id, supplier_id, price, cost, stock_quantity, reorder_level or 0, product_id))
         conn.commit()
         return jsonify({'message': 'Product updated.'})
@@ -489,7 +521,7 @@ def delete_product(product_id):
     conn = get_connection()
     try:
         cursor = conn.cursor()
-        cursor.execute('DELETE FROM products WHERE id = ?', (product_id,))
+        cursor.execute('DELETE FROM products WHERE id = %s', (product_id,))
         conn.commit()
         return jsonify({'message': 'Product deleted.'})
     finally:
@@ -517,9 +549,9 @@ def get_sales():
         if search:
             query += '''
                 WHERE
-                    sa.invoice_number LIKE ?
-                    OR u.name LIKE ?
-                    OR sa.payment_method LIKE ?
+                    sa.invoice_number LIKE %s
+                    OR u.name LIKE %s
+                    OR sa.payment_method LIKE %s
             '''
             term = f'%{search}%'
             params = [term, term, term]
@@ -548,7 +580,7 @@ def get_sale(sale_id):
                 u.name AS cashier
             FROM sales sa
             JOIN users u ON sa.user_id = u.id
-            WHERE sa.id = ?
+            WHERE sa.id = %s
         ''', (sale_id,))
         sale = cursor.fetchone()
         if not sale:
@@ -568,7 +600,7 @@ def get_sale(sale_id):
                 ((si.price - si.cost) * si.quantity) AS total_profit
             FROM sale_items si
             JOIN products p ON si.product_id = p.id
-            WHERE si.sale_id = ?
+            WHERE si.sale_id = %s
         ''', (sale_id,))
         items = rows_to_list(cursor.fetchall())
         total_cost = 0
@@ -583,7 +615,7 @@ def get_sale(sale_id):
         sale['items'] = items
         sale['total_cost'] = total_cost
         sale['gross_profit'] = total_profit
-        return jsonify(sale)
+        return jsonify(json_safe(sale))
     finally:
         conn.close()
 
@@ -604,6 +636,7 @@ def create_sale():
     conn = get_connection()
     try:
         cursor = conn.cursor()
+        cursor.execute('LOCK TABLE sales IN SHARE ROW EXCLUSIVE MODE')
         validated_items = []
 
         for item in current_transaction:
@@ -614,7 +647,8 @@ def create_sale():
             cursor.execute('''
                 SELECT id, product_name, price, cost, stock_quantity
                 FROM products
-                WHERE id = ?
+                WHERE id = %s
+                FOR UPDATE
             ''', (item['product_id'],))
             product = cursor.fetchone()
             if not product:
@@ -665,9 +699,10 @@ def create_sale():
                 payment_method,
                 amount_received,
                 change_amount
-            ) VALUES (?, ?, ?, ?, ?, ?)
+            ) VALUES (%s, %s, %s, %s, %s, %s)
+            RETURNING id
         ''', (invoice_number, user_id, total_amount, payment_method, amount_received, change_amount))
-        sale_id = cursor.lastrowid
+        sale_id = cursor.fetchone()['id']
 
         for item in validated_items:
             cursor.execute('''
@@ -678,12 +713,12 @@ def create_sale():
                     price,
                     cost,
                     subtotal
-                ) VALUES (?, ?, ?, ?, ?, ?)
+                ) VALUES (%s, %s, %s, %s, %s, %s)
             ''', (sale_id, item['product_id'], item['quantity'], item['price'], item['cost'], item['subtotal']))
             cursor.execute('''
                 UPDATE products
-                SET stock_quantity = stock_quantity - ?
-                WHERE id = ?
+                SET stock_quantity = stock_quantity - %s
+                WHERE id = %s
             ''', (item['quantity'], item['product_id']))
 
         conn.commit()
@@ -705,7 +740,7 @@ def get_reports():
         date_condition = ''
         params = []
         if start_date and end_date:
-            date_condition = 'WHERE DATE(sa.sale_date) BETWEEN ? AND ?'
+            date_condition = 'WHERE DATE(sa.sale_date) BETWEEN %s::date AND %s::date'
             params = [start_date, end_date]
 
         summary_query = f'''
@@ -728,7 +763,7 @@ def get_reports():
         '''
         cost_params = []
         if start_date and end_date:
-            cost_query += ' WHERE DATE(sa.sale_date) BETWEEN ? AND ?'
+            cost_query += ' WHERE DATE(sa.sale_date) BETWEEN %s::date AND %s::date'
             cost_params = [start_date, end_date]
         cursor.execute(cost_query, cost_params)
         cost_result = dict(cursor.fetchone())
@@ -749,7 +784,7 @@ def get_reports():
         '''
         best_seller_params = []
         if start_date and end_date:
-            best_sellers_query += ' WHERE DATE(sa.sale_date) BETWEEN ? AND ?'
+            best_sellers_query += ' WHERE DATE(sa.sale_date) BETWEEN %s::date AND %s::date'
             best_seller_params = [start_date, end_date]
         best_sellers_query += ' GROUP BY si.product_id, p.product_name ORDER BY total_quantity DESC LIMIT 5'
         cursor.execute(best_sellers_query, best_seller_params)

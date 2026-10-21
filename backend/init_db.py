@@ -1,25 +1,25 @@
-import sqlite3
 from pathlib import Path
 
+import psycopg
+
+from config import DB_CONFIG
+
 ROOT_DIR = Path(__file__).resolve().parent.parent
-DB_PATH = ROOT_DIR / 'ogong_hardware.db'
-SCHEMA_PATH = ROOT_DIR / 'database' / 'ogong_hardware_sqlite.sql'
+SCHEMA_PATH = ROOT_DIR / "database" / "ogong_hardware_postgresql.sql"
 
 
-def init_db(db_path: str | None = None):
-    target_db = Path(db_path) if db_path else DB_PATH
-    target_db.parent.mkdir(parents=True, exist_ok=True)
+def init_db():
+    database_url = DB_CONFIG["database_url"]
+    if not database_url:
+        raise RuntimeError("DATABASE_URL is required to initialize PostgreSQL.")
 
-    conn = sqlite3.connect(target_db)
-    conn.execute('PRAGMA foreign_keys = ON')
-
-    schema_sql = SCHEMA_PATH.read_text(encoding='utf-8')
-    conn.executescript(schema_sql)
-    conn.commit()
-    conn.close()
-
-    return str(target_db)
+    with psycopg.connect(database_url, connect_timeout=DB_CONFIG["connect_timeout"]) as conn:
+        with conn.cursor() as cursor:
+            for statement in SCHEMA_PATH.read_text(encoding="utf-8").split(";"):
+                if statement.strip():
+                    cursor.execute(statement)
 
 
-if __name__ == '__main__':
-    print(f'Initializing SQLite database at: {init_db()}')
+if __name__ == "__main__":
+    init_db()
+    print("PostgreSQL schema initialized.")

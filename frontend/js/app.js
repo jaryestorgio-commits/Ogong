@@ -1,4 +1,5 @@
-const apiBase = 'http://localhost:5000/api';
+const isLocalDevelopment = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+const apiBase = isLocalDevelopment ? '/api' : 'https://ogong.onrender.com/api';
 
 function getStoredUser() {
   return JSON.parse(localStorage.getItem('ogongUser') || 'null');
@@ -13,12 +14,18 @@ function clearStoredUser() {
 }
 
 async function apiFetch(path, options = {}) {
-  const response = await fetch(`${apiBase}${path}`, {
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    ...options
-  });
+  let response;
+  try {
+    response = await fetch(`${apiBase}${path}`, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      ...options
+    });
+  } catch (error) {
+    console.error(`Request to ${apiBase}${path} failed.`, error);
+    throw new Error(`Cannot reach the Ogong API at ${apiBase}. Please try again later.`);
+  }
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
     throw new Error(data.message || 'API request failed.');
