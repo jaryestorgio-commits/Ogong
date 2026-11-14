@@ -39,20 +39,22 @@
     .product-toolbar input::placeholder { color: #98a7b8; }
     .products-table-card { padding: 0; overflow: hidden; border-radius: 10px; box-shadow: 0 6px 18px rgba(16,42,67,.045); }
     .products-table-card .table-responsive { overflow-x: auto; }
-    .products-table { min-width: 830px; border-collapse: collapse; }
+    .products-table { min-width: 780px; border-collapse: collapse; }
     .products-table thead { background: #f8fafc; }
     .products-table th { padding: 12px 14px; color: #8a9bb0; font-size: 9px; font-weight: 800; text-transform: uppercase; white-space: nowrap; }
     .products-table td { padding: 12px 14px; color: #61758a; border-bottom: 1px solid #edf2f7; font-size: 11px; vertical-align: middle; }
     .products-table tbody tr:last-child td { border-bottom: 0; }
     .products-table tbody tr:hover { background: #f9fbfe; }
     .products-table th:nth-child(1), .products-table td:nth-child(1) { width: 36%; }
-    .products-table th:nth-child(4), .products-table td:nth-child(4), .products-table th:nth-child(7), .products-table td:nth-child(7) { text-align: right; }
-    .product-name-cell { display: flex; align-items: center; gap: 10px; min-width: 180px; }
+    .products-table th:nth-child(4), .products-table td:nth-child(4), .products-table th:nth-child(6), .products-table td:nth-child(6) { text-align: right; }
+    .product-name-cell { display: flex; align-items: center; gap: 10px; min-width: 220px; }
     .product-row-icon { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 34px; color: #1769e0; background: #edf5ff; border-radius: 8px; }
     .product-row-icon svg { width: 17px; height: 17px; }
-    .product-name-copy strong { display: block; color: #183653; font-size: 11px; }
+    .product-name-copy { flex: 1; min-width: 0; }
+    .product-name-copy .product-name-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 0; color: inherit; font-size: inherit; white-space: normal; }
+    .product-name-copy strong { display: block; min-width: 0; color: #183653; font-size: 11px; }
     .product-name-copy span { display: block; margin-top: 3px; color: #9aa8b8; font-size: 9px; }
-    .price-value { color: #183653; font-weight: 800; white-space: nowrap; }
+    .product-name-copy .product-inline-price { display: inline-flex; flex: 0 0 auto; margin-top: 0; padding: 5px 8px; color: #087f5b; background: #eafaf2; border-radius: 999px; font-size: 10px; font-weight: 800; white-space: nowrap; }
     .stock-detail { display: block; margin-top: 3px; color: #98a7b8; font-size: 9px; white-space: nowrap; }
     .stock-badge { display: inline-flex; align-items: center; padding: 5px 8px; border-radius: 999px; font-size: 9px; font-weight: 800; white-space: nowrap; }
     .stock-good { color: #087f5b; background: #eafaf2; }
@@ -83,6 +85,17 @@
     .products-page .form-help { color: #8999aa; font-size: 10px; }
     .required { color: #dc2626; }
     .products-page .modal-actions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 14px; margin-top: 6px; border-top: 1px solid #edf2f7; }
+    @media print {
+      .sidebar, .sidebar-toggle, .sidebar-overlay, #alert-container, .product-summary, .product-toolbar { display: none !important; }
+      .products-page { display: block !important; width: 100% !important; height: auto !important; padding: 0 !important; overflow: visible !important; background: #fff !important; }
+      .products-page .header { margin: 0 0 14px !important; }
+      .products-page .products-table-card { display: block !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; page-break-inside: auto !important; break-inside: auto !important; }
+      .products-page .products-table-card .table-responsive { overflow: visible !important; }
+      .products-table { min-width: 0 !important; }
+      .products-table th:last-child, .products-table td:last-child { display: none !important; }
+      .product-inline-price { border: 1px solid #a7d8c2 !important; }
+      .product-row-icon { display: none !important; }
+    }
     @media (max-width: 950px) { .product-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 600px) {
       .products-page { padding: 18px 14px; }
@@ -221,6 +234,11 @@
           Refresh
         </button>
 
+        <button class="button button-secondary" id="print-product-catalog-btn" type="button">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7z"/></svg>
+          Print Catalog
+        </button>
+
         <button class="button button-primary" id="toolbar-add-product-btn" type="button">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
           Add Product
@@ -237,10 +255,9 @@
           <thead>
 
             <tr>
-              <th>Product</th>
+              <th>Product &amp; Price</th>
               <th>Category</th>
               <th>Supplier</th>
-              <th>Price</th>
               <th>Stock</th>
               <th>Status</th>
               <th>Actions</th>
@@ -251,7 +268,7 @@
           <tbody id="products-table-body">
 
             <tr>
-              <td colspan="7">
+              <td colspan="6">
                 <div class="loading-products">
                   Loading products...
                 </div>
@@ -676,7 +693,7 @@
 
     tbody.innerHTML = `
       <tr>
-        <td colspan="7">
+        <td colspan="6">
           <div class="loading-products">
             Loading products...
           </div>
@@ -695,7 +712,7 @@
 
       tbody.innerHTML = `
         <tr>
-          <td colspan="7">
+          <td colspan="6">
             <div class="empty-products">
               <div><strong>Products could not be loaded</strong><span>Check your connection and try again.</span><p><button class="button button-secondary" type="button" onclick="loadProducts()">Try again</button></p></div>
             </div>
@@ -799,7 +816,7 @@
 
       tbody.innerHTML = `
         <tr>
-          <td colspan="7">
+          <td colspan="6">
             <div class="empty-products">
               <div><strong>${products.length ? 'No matching products' : 'No products yet'}</strong><span>${products.length ? 'Try changing your search or filters.' : 'Add a product to start building your inventory.'}</span></div>
             </div>
@@ -860,7 +877,7 @@
         <td>
           <div class="product-name-cell">
             <span class="product-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.5 7.5 7.5 4 7.5-4M12 12v9"/></svg></span>
-            <span class="product-name-copy"><strong>${escapeHtml(product.product_name)}</strong><span>ID #${escapeHtml(product.id)}${createdDate ? ` · Added ${escapeHtml(createdDate)}` : ''}</span></span>
+            <span class="product-name-copy"><span class="product-name-line"><strong>${escapeHtml(product.product_name)}</strong><span class="product-inline-price">${formatCurrency(product.price)}</span></span><span>ID #${escapeHtml(product.id)}${createdDate ? ` · Added ${escapeHtml(createdDate)}` : ''}</span></span>
           </div>
         </td>
 
@@ -875,13 +892,6 @@
         <td>
           ${escapeHtml(
             product.supplier_name || '—'
-          )}
-        </td>
-
-
-        <td>
-          ${formatCurrency(
-            product.price
           )}
         </td>
 
@@ -1357,6 +1367,10 @@
   document
     .getElementById('toolbar-add-product-btn')
     .addEventListener('click', openAddProductModal);
+
+  document
+    .getElementById('print-product-catalog-btn')
+    .addEventListener('click', () => window.print());
 
   document
     .getElementById('product-clear-filters-btn')

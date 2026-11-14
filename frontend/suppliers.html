@@ -5,55 +5,92 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Suppliers - OGONG Hardware</title>
   <link rel="stylesheet" href="css/styles.css">
-</head>
-<style>
-  .dashboard-logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 28px;
-      
-      
-    }
-
+  <style>
+    .dashboard-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
     .dashboard-logo-mark {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      background: #0f2747;
-      background:
-          linear-gradient(
-                    rgba(0, 0, 0, 0.326),
-                    rgba(0, 0, 0, 0.44)
-                ),
-          url("images/logo.png");
-      color: white;
       display: flex;
       align-items: center;
       justify-content: center;
+      width: 48px;
+      height: 48px;
+      color: #fff;
+      background: linear-gradient(rgba(0,0,0,.326), rgba(0,0,0,.44)), url("images/logo.png");
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(15,39,71,.18);
       font-size: 22px;
       font-weight: 800;
-      box-shadow: 0 4px 12px rgba(15, 39, 71, 0.18);
     }
-
-    .dashboard-logo-text {
-      line-height: 1.1;
+    .dashboard-logo-text { line-height: 1.1; }
+    .dashboard-logo-text strong { display: block; color: #0f2747; font-size: 16px; }
+    .dashboard-logo-text span { display: block; margin-top: 3px; color: #64748b; font-size: 11px; letter-spacing: .5px; }
+    .suppliers-page { min-width: 0; background: #f7f9fc; }
+    .suppliers-page .header { align-items: center; gap: 18px; margin-bottom: 20px; }
+    .suppliers-title { display: flex; align-items: center; gap: 13px; min-width: 0; }
+    .suppliers-title-icon { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; color: #1769e0; background: #edf5ff; border-radius: 10px; }
+    .suppliers-title-icon svg { width: 22px; height: 22px; }
+    .suppliers-page .header h2 { margin: 0 0 5px; color: #102a43; font-size: 27px; }
+    .suppliers-page .header p { margin: 0; color: #708198; font-size: 13px; }
+    .suppliers-page .button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 37px; padding: 8px 12px; border-radius: 7px; font-size: 11px; font-weight: 700; transition: background-color .16s ease, border-color .16s ease, transform .16s ease; }
+    .suppliers-page .button-primary { background: #1769e0; box-shadow: 0 4px 10px rgba(23,105,224,.16); }
+    .suppliers-page .button-primary:hover { background: #1058c4; }
+    .suppliers-page .button-secondary { color: #31516e; background: #f4f8fd; border: 1px solid #e2eaf3; }
+    .suppliers-page .button-secondary:hover { color: #1769e0; background: #edf5ff; border-color: #cfe1f9; }
+    .supplier-toolbar { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; padding: 13px; margin-bottom: 13px; background: #fff; border: 1px solid #e4eaf1; border-radius: 10px; box-shadow: 0 4px 14px rgba(16,42,67,.035); }
+    .supplier-toolbar input { flex: 1 1 260px; min-width: 190px; height: 39px; padding: 8px 11px; color: #183653; border-color: #e1e8f0; border-radius: 7px; font-size: 12px; }
+    .supplier-toolbar input::placeholder { color: #98a7b8; }
+    .supplier-toolbar input:focus, .suppliers-modal .form-group input:focus, .suppliers-modal .form-group textarea:focus { border-color: #75a9ed; box-shadow: 0 0 0 3px #edf5ff; }
+    .supplier-table-card { padding: 0; overflow: hidden; border-radius: 10px; box-shadow: 0 6px 18px rgba(16,42,67,.045); }
+    .supplier-table { min-width: 850px; border-collapse: collapse; }
+    .supplier-table thead { background: #f8fafc; }
+    .supplier-table th { padding: 12px 14px; color: #8a9bb0; font-size: 9px; font-weight: 800; text-align: left; text-transform: uppercase; white-space: nowrap; }
+    .supplier-table td { padding: 12px 14px; color: #61758a; border-bottom: 1px solid #edf2f7; font-size: 11px; vertical-align: middle; }
+    .supplier-table tbody tr { transition: background-color .16s ease; }
+    .supplier-table tbody tr:last-child td { border-bottom: 0; }
+    .supplier-table tbody tr:hover { background: #f9fbfe; }
+    .supplier-id { color: #8a9bb0 !important; font-size: 10px !important; font-weight: 700; }
+    .supplier-name-cell { display: flex; align-items: center; gap: 10px; min-width: 175px; }
+    .supplier-row-icon { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 34px; color: #1769e0; background: #edf5ff; border-radius: 8px; }
+    .supplier-row-icon svg { width: 17px; height: 17px; }
+    .supplier-name-cell strong { color: #183653; font-size: 11px; overflow-wrap: anywhere; }
+    .supplier-contact { color: #52677d; font-weight: 600; }
+    .supplier-detail { display: block; max-width: 220px; overflow: hidden; color: #61758a; text-overflow: ellipsis; white-space: nowrap; }
+    .supplier-empty { padding: 28px !important; color: #8293a7 !important; text-align: center; }
+    .supplier-actions { display: flex; justify-content: flex-end; gap: 6px; white-space: nowrap; }
+    .suppliers-page .button-danger { color: #b42318; background: #fff5f4; border: 1px solid #f5d3d0; }
+    .suppliers-page .button-danger:hover { background: #fff0ef; border-color: #ecb8b2; }
+    .supplier-table .button:hover { transform: translateY(-1px); }
+    .suppliers-modal .modal-content { width: min(660px, 95vw); max-height: calc(100vh - 36px); padding: 23px; border-radius: 12px; }
+    .suppliers-modal .modal-header { padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid #edf2f7; }
+    .suppliers-modal .modal-header h2 { margin: 0; color: #102a43; font-size: 18px; }
+    .suppliers-modal .modal-close { width: 32px; height: 32px; color: #6b7f93; background: #f4f7fa; border-radius: 7px; }
+    .supplier-modal-subtitle { margin: -4px 0 16px; color: #8293a7; font-size: 11px; line-height: 1.5; }
+    .supplier-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 13px; }
+    .supplier-form-grid .form-group { margin-bottom: 12px; }
+    .supplier-form-grid .form-group:last-child { grid-column: 1 / -1; }
+    .suppliers-modal .form-group label { color: #52677d; font-size: 11px; font-weight: 700; }
+    .suppliers-modal .form-group input, .suppliers-modal .form-group textarea { min-height: 39px; padding: 8px 10px; color: #183653; border-color: #dfe7f0; border-radius: 7px; font-size: 12px; }
+    .suppliers-modal .form-group textarea { min-height: 78px; resize: vertical; }
+    .supplier-modal-actions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 14px; margin-top: 6px; border-top: 1px solid #edf2f7; }
+    @media (max-width: 768px) {
+      .suppliers-page { padding: 18px 14px; }
+      .suppliers-page .header { align-items: flex-start; gap: 14px; }
+      .suppliers-page .header h2 { font-size: 23px; }
+      .suppliers-page .header > .button { flex: 0 0 auto; padding: 9px 10px; }
+      .suppliers-title { align-items: flex-start; gap: 9px; }
+      .suppliers-title-icon { width: 38px; height: 38px; flex-basis: 38px; }
+      .supplier-toolbar { align-items: stretch; padding: 11px; }
+      .supplier-toolbar input { flex-basis: 100%; width: 100%; min-width: 0; }
+      .supplier-toolbar .button { flex: 1; }
+      .suppliers-modal .modal-content { padding: 18px; }
     }
-
-    .dashboard-logo-text strong {
-      display: block;
-      font-size: 16px;
-      color: #0f2747;
+    @media (max-width: 520px) {
+      .suppliers-page .header { flex-direction: column; }
+      .suppliers-page .header > .button { align-self: stretch; }
+      .supplier-form-grid { grid-template-columns: 1fr; gap: 0; }
+      .supplier-form-grid .form-group:last-child { grid-column: auto; }
     }
-
-    .dashboard-logo-text span {
-      display: block;
-      font-size: 11px;
-      color: #64748b;
-      margin-top: 3px;
-      letter-spacing: .5px;
-    }
-</style>
+  </style>
+</head>
 <body>
 
 <div class="container">
@@ -78,13 +115,18 @@
     </aside>
 
   <!-- MAIN -->
-  <main class="main">
+  <main class="main suppliers-page">
 
     <!-- HEADER -->
     <div class="header">
-      <div>
+      <div class="suppliers-title">
+        <span class="suppliers-title-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v13H3z"/><path d="M7 7V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/><path d="M3 12h18M10 12v2h4v-2"/></svg>
+        </span>
+        <div>
         <h2>Suppliers</h2>
         <p>Manage supplier information and contacts.</p>
+        </div>
       </div>
 
       <button
@@ -92,6 +134,7 @@
         id="add-supplier-btn"
         type="button"
       >
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         Add Supplier
       </button>
     </div>
@@ -99,7 +142,7 @@
     <div id="alert-container"></div>
 
     <!-- SEARCH -->
-    <div class="top-bar">
+    <div class="supplier-toolbar">
 
       <input
         class="search-input"
@@ -127,11 +170,11 @@
     </div>
 
     <!-- SUPPLIERS TABLE -->
-    <div class="table-card">
+    <div class="table-card supplier-table-card">
 
       <div class="table-responsive">
 
-        <table>
+        <table class="supplier-table">
 
           <thead>
             <tr>
@@ -162,7 +205,7 @@
      SUPPLIER MODAL
      ============================== -->
 
-<div class="modal" id="supplier-modal">
+<div class="modal suppliers-modal" id="supplier-modal">
 
   <div class="modal-content">
 
@@ -183,12 +226,14 @@
     </div>
 
     <div id="supplier-modal-alert"></div>
+    <p class="supplier-modal-subtitle">Keep supplier contact details organized for inventory and purchasing.</p>
+    <div class="supplier-form-grid">
 
     <!-- SUPPLIER NAME -->
     <div class="form-group">
 
       <label for="supplier-name">
-        Supplier Name *
+        Supplier Name <span class="required">*</span>
       </label>
 
       <input
@@ -263,9 +308,10 @@
       ></textarea>
 
     </div>
+    </div>
 
     <!-- BUTTONS -->
-    <div class="top-bar">
+    <div class="supplier-modal-actions">
 
       <button
         class="button button-primary"
@@ -307,7 +353,6 @@ if (!user) {
 } else {
 
   renderSidebar('suppliers');
-  renderTopbar();
 
 }
 
@@ -390,7 +435,7 @@ async function loadSuppliers(search = '') {
 
   tbody.innerHTML = `
     <tr>
-      <td colspan="7" style="text-align:center;">
+      <td colspan="7" class="supplier-empty">
         Loading suppliers...
       </td>
     </tr>
@@ -412,7 +457,7 @@ async function loadSuppliers(search = '') {
 
       tbody.innerHTML = `
         <tr>
-          <td colspan="7" style="text-align:center;">
+          <td colspan="7" class="supplier-empty">
             No suppliers found.
           </td>
         </tr>
@@ -430,41 +475,49 @@ async function loadSuppliers(search = '') {
 
       row.innerHTML = `
 
-        <td>
-          ${supplier.id}
+        <td class="supplier-id">
+          #${supplier.id}
         </td>
 
         <td>
-          <strong>
-            ${escapeHtml(supplier.supplier_name)}
-          </strong>
+          <div class="supplier-name-cell">
+            <span class="supplier-row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v13H3z"/><path d="M7 7V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/><path d="M3 12h18M10 12v2h4v-2"/></svg></span>
+            <strong>${escapeHtml(supplier.supplier_name)}</strong>
+          </div>
         </td>
 
-        <td>
+        <td class="supplier-contact">
           ${escapeHtml(
             supplier.contact_person || '—'
           )}
         </td>
 
         <td>
+          <span class="supplier-detail" title="${escapeHtml(supplier.phone || '—')}">
           ${escapeHtml(
             supplier.phone || '—'
           )}
+          </span>
         </td>
 
         <td>
+          <span class="supplier-detail" title="${escapeHtml(supplier.email || '—')}">
           ${escapeHtml(
             supplier.email || '—'
           )}
+          </span>
         </td>
 
         <td>
+          <span class="supplier-detail" title="${escapeHtml(supplier.address || '—')}">
           ${escapeHtml(
             supplier.address || '—'
           )}
+          </span>
         </td>
 
         <td>
+          <div class="supplier-actions">
 
           <button
             class="button button-secondary"
@@ -481,6 +534,7 @@ async function loadSuppliers(search = '') {
           >
             Delete
           </button>
+          </div>
 
         </td>
 
@@ -494,7 +548,7 @@ async function loadSuppliers(search = '') {
 
     tbody.innerHTML = `
       <tr>
-        <td colspan="7" style="text-align:center;">
+        <td colspan="7" class="supplier-empty">
           Unable to load suppliers.
         </td>
       </tr>
