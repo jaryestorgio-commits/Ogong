@@ -9,7 +9,7 @@ from decimal import Decimal
 import psycopg
 from psycopg.rows import dict_row
 
-from config import DB_CONFIG, SECRET_KEY
+from config import DB_CONFIG, DB_SCHEMA, SECRET_KEY
 
 app = Flask(__name__, static_folder='../frontend', static_url_path='')
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -104,6 +104,7 @@ def get_connection():
     return psycopg.connect(
         database_url,
         connect_timeout=DB_CONFIG['connect_timeout'],
+        options=f'-c search_path={DB_SCHEMA}',
         row_factory=dict_row
     )
 

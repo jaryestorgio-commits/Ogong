@@ -15,3 +15,4 @@ DB_CONFIG = {
 }
 
 SECRET_KEY = os.environ.get("OGONG_SECRET_KEY")
+DB_SCHEMA = "ogong_pos"
