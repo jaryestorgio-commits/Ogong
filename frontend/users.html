@@ -5,17 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Users - OGONG Hardware</title>
   <link rel="stylesheet" href="css/styles.css">
-</head>
-<style>
-  .dashboard-logo {
+  <style>
+    .dashboard-logo {
       display: flex;
       align-items: center;
       gap: 12px;
       margin-bottom: 28px;
-      
-      
     }
-
     .dashboard-logo-mark {
       width: 48px;
       height: 48px;
@@ -35,25 +31,79 @@
       font-weight: 800;
       box-shadow: 0 4px 12px rgba(15, 39, 71, 0.18);
     }
-
-    .dashboard-logo-text {
-      line-height: 1.1;
+    .dashboard-logo-text { line-height: 1.1; }
+    .dashboard-logo-text strong { display: block; font-size: 16px; color: #0f2747; }
+    .dashboard-logo-text span { display: block; margin-top: 3px; color: #64748b; font-size: 11px; letter-spacing: .5px; }
+    .users-page { min-width: 0; background: #f7f9fc; }
+    .users-page .header { align-items: center; gap: 18px; margin-bottom: 20px; }
+    .users-title { display: flex; align-items: center; gap: 13px; min-width: 0; }
+    .users-title-icon { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; color: #1769e0; background: #edf5ff; border-radius: 10px; }
+    .users-title-icon svg { width: 22px; height: 22px; }
+    .users-page .header h2 { margin: 0 0 5px; color: #102a43; font-size: 27px; }
+    .users-page .header p { margin: 0; color: #708198; font-size: 13px; }
+    .users-page .button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 36px; padding: 8px 12px; border-radius: 7px; font-size: 11px; font-weight: 700; transition: background-color .16s ease, border-color .16s ease, transform .16s ease; }
+    .users-page .button-primary { background: #1769e0; box-shadow: 0 4px 10px rgba(23,105,224,.16); }
+    .users-page .button-primary:hover { background: #1058c4; }
+    .users-page .button-secondary { color: #31516e; background: #f4f8fd; border: 1px solid #e2eaf3; }
+    .users-page .button-secondary:hover { color: #1769e0; background: #edf5ff; border-color: #cfe1f9; }
+    .users-table-card { padding: 0; overflow: hidden; border-radius: 10px; box-shadow: 0 6px 18px rgba(16,42,67,.045); }
+    .users-table-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 17px 13px; border-bottom: 1px solid #edf2f7; }
+    .users-table-heading h3 { margin: 0; color: #183653; font-size: 13px; }
+    .users-table-heading p { margin: 4px 0 0; color: #8a9bb0; font-size: 10px; }
+    .users-table-count { display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; color: #1769e0; background: #edf5ff; border-radius: 999px; font-size: 10px; font-weight: 800; white-space: nowrap; }
+    .users-table { min-width: 650px; border-collapse: collapse; }
+    .users-table thead { background: #f8fafc; }
+    .users-table th { padding: 12px 14px; color: #8a9bb0; font-size: 9px; font-weight: 800; text-align: left; text-transform: uppercase; white-space: nowrap; }
+    .users-table td { padding: 12px 14px; color: #61758a; border-bottom: 1px solid #edf2f7; font-size: 11px; vertical-align: middle; }
+    .users-table tbody tr { transition: background-color .16s ease; }
+    .users-table tbody tr:last-child td { border-bottom: 0; }
+    .users-table tbody tr:hover { background: #f9fbfe; }
+    .user-name-cell { display: flex; align-items: center; gap: 10px; min-width: 190px; }
+    .user-avatar { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 34px; color: #1769e0; background: #edf5ff; border-radius: 9px; font-size: 10px; font-weight: 800; }
+    .user-name-copy { min-width: 0; }
+    .user-name-copy strong { display: block; color: #183653; font-size: 11px; overflow-wrap: anywhere; }
+    .user-you-badge { display: inline-flex; margin-left: 6px; padding: 3px 6px; color: #1769e0; background: #edf5ff; border-radius: 999px; font-size: 8px; font-weight: 800; vertical-align: middle; }
+    .user-id { color: #8a9bb0 !important; font-size: 10px !important; font-weight: 700; }
+    .user-username { color: #52677d; font-weight: 600; }
+    .user-role-badge { display: inline-flex; align-items: center; padding: 5px 8px; border-radius: 999px; font-size: 9px; font-weight: 800; white-space: nowrap; }
+    .user-role-badge.admin { color: #a15c00; background: #fff6e5; }
+    .user-role-badge.staff { color: #1769e0; background: #edf5ff; }
+    .user-actions { display: flex; justify-content: flex-end; gap: 6px; white-space: nowrap; }
+    .users-page .button-danger { color: #b42318; background: #fff5f4; border: 1px solid #f5d3d0; }
+    .users-page .button-danger:hover:not(:disabled) { background: #fff0ef; border-color: #ecb8b2; }
+    .users-page .button:disabled { cursor: not-allowed; opacity: .48; }
+    .users-empty { padding: 28px !important; color: #8293a7 !important; text-align: center; }
+    .users-modal .modal-content { width: min(620px, 95vw); max-height: calc(100vh - 36px); padding: 23px; border-radius: 12px; }
+    .users-modal .modal-header { padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid #edf2f7; }
+    .users-modal .modal-header h2 { margin: 0; color: #102a43; font-size: 18px; }
+    .users-modal .modal-close { width: 32px; height: 32px; color: #6b7f93; background: #f4f7fa; border-radius: 7px; }
+    .user-modal-subtitle { margin: -4px 0 16px; color: #8293a7; font-size: 11px; line-height: 1.5; }
+    .user-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 13px; }
+    .user-form-grid .form-group { margin-bottom: 12px; }
+    .user-form-grid .form-group:nth-child(3), .user-form-grid .form-group:nth-child(4) { grid-column: 1 / -1; }
+    .users-modal .form-group label { color: #52677d; font-size: 11px; font-weight: 700; }
+    .users-modal .form-group input, .users-modal .form-group select { height: 39px; padding: 8px 10px; color: #183653; border-color: #dfe7f0; border-radius: 7px; font-size: 12px; }
+    .users-modal .form-group input:focus, .users-modal .form-group select:focus { border-color: #75a9ed; box-shadow: 0 0 0 3px #edf5ff; }
+    .users-modal .form-help { color: #8999aa; font-size: 10px; }
+    .users-modal .modal-actions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 14px; margin-top: 6px; border-top: 1px solid #edf2f7; }
+    @media (max-width: 768px) {
+      .users-page { padding: 18px 14px; }
+      .users-page .header { align-items: flex-start; gap: 14px; }
+      .users-page .header h2 { font-size: 23px; }
+      .users-page .header > .button { flex: 0 0 auto; padding: 9px 10px; }
+      .users-title { align-items: flex-start; gap: 9px; }
+      .users-title-icon { width: 38px; height: 38px; flex-basis: 38px; }
+      .users-modal .modal-content { padding: 18px; }
     }
-
-    .dashboard-logo-text strong {
-      display: block;
-      font-size: 16px;
-      color: #0f2747;
+    @media (max-width: 520px) {
+      .users-page .header { flex-direction: column; }
+      .users-page .header > .button { align-self: stretch; }
+      .users-table-heading { align-items: flex-start; }
+      .user-form-grid { grid-template-columns: 1fr; gap: 0; }
+      .user-form-grid .form-group:nth-child(3), .user-form-grid .form-group:nth-child(4) { grid-column: auto; }
     }
-
-    .dashboard-logo-text span {
-      display: block;
-      font-size: 11px;
-      color: #64748b;
-      margin-top: 3px;
-      letter-spacing: .5px;
-    }
-</style>
+  </style>
+</head>
 <body>
 
 <div class="container">
@@ -77,12 +127,17 @@
 
     </aside>
 
-          <main class="main">
+          <main class="main users-page">
             <div class="header">
-      <div>
+      <div class="users-title">
+        <span class="users-title-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20c.5-3 2.5-5 6-5s5.5 2 6 5M16 5.5a3 3 0 0 1 0 5.8M17 15c2.3.4 3.6 2 4 4"/></svg>
+        </span>
+        <div>
           <h2>Users</h2>
-              <p>Manage system accounts, staff, and administrator access.</p>
-           </div>
+          <p>Manage system accounts, staff, and administrator access.</p>
+        </div>
+      </div>
 
       <button
         class="button button-primary"
@@ -96,18 +151,19 @@
 
     <div id="alert-container"></div>
 
-      <div class="table-card">
+      <div class="table-card users-table-card">
 
-      <div class="header">
+      <div class="users-table-heading">
         <div>
           <h3>System Users</h3>
           <p>Accounts authorized to access the Ogong Hardware system.</p>
         </div>
+        <span class="users-table-count" id="users-count">0 accounts</span>
       </div>
 
       <div class="table-responsive">
 
-        <table>
+        <table class="users-table">
 
           <thead>
             <tr>
@@ -131,7 +187,7 @@
 
 </div>
 
-<div class="modal" id="user-modal">
+<div class="modal users-modal" id="user-modal">
   <div class="modal-content">
     <div class="modal-header">
        <h2 id="user-modal-title">
@@ -148,8 +204,9 @@
 
     </div>
 
-
     <div id="user-modal-alert"></div>
+    <p class="user-modal-subtitle">Set the account details and choose the access role for this staff member.</p>
+    <div class="user-form-grid">
     <div class="form-group">
 
       <label for="user-name">
@@ -193,7 +250,7 @@
 
       <small
         id="password-help"
-        style="color:#6b7280;"
+        class="form-help"
       >
         Password is required when creating a new user.
       </small>
@@ -217,7 +274,8 @@
 
       </select>
     </div>
-    <div class="top-bar">
+    </div>
+    <div class="modal-actions">
 
       <button
         class="button button-primary"
@@ -303,8 +361,11 @@ async function loadUsers() {
 
     const tbody =
       document.getElementById('users-table-body');
+    const userCount =
+      document.getElementById('users-count');
 
     tbody.innerHTML = '';
+    userCount.textContent = `${users ? users.length : 0} ${users && users.length === 1 ? 'account' : 'accounts'}`;
 
 
     if (!users || users.length === 0) {
@@ -313,11 +374,7 @@ async function loadUsers() {
         <tr>
           <td
             colspan="5"
-            style="
-              text-align:center;
-              padding:20px;
-              color:#6b7280;
-            "
+            class="users-empty"
           >
             No users found.
           </td>
@@ -343,58 +400,50 @@ async function loadUsers() {
         acc.role === 'ADMIN'
           ? 'ADMIN'
           : 'STAFF';
+      const initials = String(acc.name || '')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(part => part.charAt(0))
+        .join('')
+        .toUpperCase() || 'U';
 
 
       row.innerHTML = `
 
-        <td>
-          ${acc.id}
+        <td class="user-id">
+          #${acc.id}
         </td>
 
         <td>
-          <strong>
-            ${escapeHTML(acc.name || '')}
-          </strong>
+          <div class="user-name-cell">
+            <span class="user-avatar" aria-hidden="true">${escapeHTML(initials)}</span>
+            <span class="user-name-copy">
+              <strong>${escapeHTML(acc.name || '')}</strong>
 
-          ${
-            isCurrentUser
-              ? `
-                <span
-                  style="
-                    margin-left:6px;
-                    font-size:12px;
-                    color:#2563eb;
-                    font-weight:600;
-                  "
-                >
-                  You
-                </span>
-              `
-              : ''
-          }
+              ${
+                isCurrentUser
+                  ? '<span class="user-you-badge">You</span>'
+                  : ''
+              }
+            </span>
+          </div>
 
         </td>
 
-        <td>
+        <td class="user-username">
           ${escapeHTML(acc.username || '')}
         </td>
 
         <td>
-          <span
-            style="
-              font-weight:600;
-              color:${
-                acc.role === 'ADMIN'
-                  ? '#b45309'
-                  : '#2563eb'
-              };
-            "
-          >
+          <span class="user-role-badge ${acc.role === 'ADMIN' ? 'admin' : 'staff'}">
             ${roleLabel}
           </span>
         </td>
 
         <td>
+          <div class="user-actions">
 
           <button
             class="button button-secondary"
@@ -412,6 +461,7 @@ async function loadUsers() {
           >
             Delete
           </button>
+          </div>
 
         </td>
 

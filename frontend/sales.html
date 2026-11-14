@@ -7,99 +7,141 @@
   <link rel="stylesheet" href="css/styles.css">
 
   <style>
+    .sales-page { min-width: 0; background: #f7f9fc; }
+    .sales-page .header { align-items: center; gap: 18px; margin-bottom: 20px; }
+    .sales-title { display: flex; align-items: center; gap: 13px; min-width: 0; }
+    .sales-title-icon { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; color: #1769e0; background: #edf5ff; border-radius: 10px; }
+    .sales-title-icon svg { width: 22px; height: 22px; }
+    .sales-page .header h2 { margin: 0 0 5px; color: #102a43; font-size: 27px; }
+    .sales-page .header p { margin: 0; color: #708198; font-size: 13px; }
     .sales-summary {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-      margin-bottom: 16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 17px;
     }
 
     .sales-summary .card {
+      position: relative;
+      min-width: 0;
+      min-height: 100px;
       margin: 0;
+      padding: 16px;
+      border-color: #e4eaf1;
+      border-radius: 10px;
+      box-shadow: 0 5px 16px rgba(16,42,67,.045);
+      transition: transform .18s ease, box-shadow .18s ease;
     }
 
-    .sales-summary p {
-      font-size: 24px;
-      font-weight: 700;
-      margin: 8px 0 0;
-    }
-
-    .sales-filters {
+    .sales-summary .card:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(16,42,67,.075); }
+    .sales-summary h3 { margin: 0; color: #73849a; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+    .sales-summary p { margin: 12px 0 0; color: #102a43; font-size: 23px; font-weight: 800; }
+    .sales-summary .sales-summary-total { color: #059669; }
+    .sales-toolbar {
       display: flex;
-      gap: 10px;
       align-items: end;
+      gap: 9px;
       flex-wrap: wrap;
+      padding: 14px;
+      margin-bottom: 13px;
+      background: #fff;
+      border: 1px solid #e4eaf1;
+      border-radius: 10px;
+      box-shadow: 0 4px 14px rgba(16,42,67,.035);
+    }
+
+    .sales-toolbar .form-group { flex: 1 1 175px; min-width: 155px; margin: 0; }
+    .sales-toolbar .form-group label { color: #52677d; font-size: 10px; font-weight: 700; }
+    .sales-toolbar input, .sales-toolbar select { height: 39px; padding: 8px 11px; color: #183653; border-color: #e1e8f0; border-radius: 7px; font-size: 12px; }
+    .sales-toolbar input::placeholder { color: #98a7b8; }
+    .sales-toolbar input:focus, .sales-toolbar select:focus { border-color: #75a9ed; box-shadow: 0 0 0 3px #edf5ff; }
+    .sales-actions { display: flex; gap: 7px; flex-wrap: wrap; }
+    .sales-page .button { display: inline-flex; align-items: center; justify-content: center; min-height: 37px; padding: 8px 12px; border-radius: 7px; font-size: 11px; font-weight: 700; transition: background-color .16s ease, border-color .16s ease, transform .16s ease; }
+    .sales-page .button-secondary { color: #31516e; background: #f4f8fd; border: 1px solid #e2eaf3; }
+    .sales-page .button-secondary:hover { background: #eaf2fc; border-color: #cfe1f9; }
+    .sales-table-card { padding: 0; overflow: hidden; border-radius: 10px; box-shadow: 0 6px 18px rgba(16,42,67,.045); }
+    .sales-table { min-width: 720px; border-collapse: collapse; }
+    .sales-table thead { background: #f8fafc; }
+    .sales-table th { padding: 12px 14px; color: #8a9bb0; font-size: 9px; font-weight: 800; text-transform: uppercase; white-space: nowrap; }
+    .sales-table td { padding: 12px 14px; color: #61758a; border-bottom: 1px solid #edf2f7; font-size: 11px; vertical-align: middle; }
+    .sales-table tbody tr { transition: background-color .16s ease; }
+    .sales-table tbody tr:last-child td { border-bottom: 0; }
+    .sales-table tbody tr:hover { background: #f9fbfe; }
+    .sales-invoice { color: #183653; font-weight: 800; }
+    .sales-amount { color: #183653; font-weight: 800; white-space: nowrap; }
+    .sales-payment { display: inline-flex; padding: 5px 8px; color: #31516e; background: #f1f5f9; border-radius: 999px; font-size: 9px; font-weight: 800; white-space: nowrap; }
+    .sales-table .button:hover { transform: translateY(-1px); }
+    .sales-page .loading-state, .sales-page .empty-state { padding: 30px; color: #8293a7; text-align: center; font-size: 12px; }
+    .sale-detail-header {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
       margin-bottom: 16px;
     }
 
-    .sales-filters .form-group {
-      margin: 0;
-      flex: 1;
-      min-width: 200px;
-    }
-
-    .sales-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .loading-state,
-    .empty-state {
-      text-align: center;
-      padding: 30px;
-      color: #6b7280;
-    }
-
-    .sale-detail-header {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-      margin-bottom: 18px;
-    }
-
     .sale-detail-box {
-      background: #f8fafc;
-      border-radius: 8px;
+      min-width: 0;
       padding: 12px;
+      background: #f7f9fc;
+      border: 1px solid #e8eef5;
+      border-radius: 8px;
     }
 
     .sale-detail-box small {
       display: block;
-      color: #6b7280;
-      margin-bottom: 4px;
+      margin-bottom: 5px;
+      color: #8a9bb0;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
     }
 
     .sale-detail-box strong {
-      font-size: 15px;
+      color: #183653;
+      font-size: 12px;
+      overflow-wrap: anywhere;
     }
 
     .receipt-total {
       display: flex;
       justify-content: space-between;
-      padding: 12px 0;
-      border-top: 1px solid #e5e7eb;
-      margin-top: 12px;
-      font-size: 18px;
+      gap: 12px;
+      padding: 14px 0;
+      margin-top: 10px;
+      border-top: 1px solid #e8eef5;
+      color: #708198;
+      font-size: 13px;
+      font-weight: 700;
     }
 
-    .receipt-payment {
-      margin-top: 10px;
-    }
+    .receipt-total strong { color: #102a43; font-size: 18px; }
+    .receipt-payment { padding: 12px; margin-top: 8px; background: #f7f9fc; border-radius: 8px; color: #61758a; font-size: 12px; }
+    .receipt-payment p { margin: 4px 0; }
+    #sale-detail-modal .modal-content { width: min(680px, 95vw); padding: 23px; border-radius: 12px; }
+    #sale-detail-modal .modal-header { padding-bottom: 14px; border-bottom: 1px solid #edf2f7; }
+    #sale-detail-modal .modal-header h2 { color: #102a43; font-size: 18px; }
+    #sale-detail-modal .modal-close { width: 32px; height: 32px; color: #6b7f93; background: #f4f7fa; border-radius: 7px; }
 
     @media (max-width: 768px) {
-      .table-responsive {
-        overflow-x: auto;
-      }
+      .sales-page { padding: 18px 14px; }
+      .sales-page .header { align-items: flex-start; }
+      .sales-page .header h2 { font-size: 23px; }
+      .sales-toolbar { align-items: stretch; padding: 11px; }
+      .sales-toolbar .form-group { flex: 1 1 calc(50% - 5px); min-width: 0; }
+      .sales-actions { width: 100%; }
+      .sales-actions .button { flex: 1; }
+      #sale-detail-modal .modal-content { padding: 18px; }
+    }
 
-      .sales-filters {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .sales-filters .form-group {
-        width: 100%;
-      }
+    @media (max-width: 480px) {
+      .sales-title { align-items: flex-start; gap: 9px; }
+      .sales-title-icon { width: 38px; height: 38px; flex-basis: 38px; }
+      .sales-summary { gap: 9px; }
+      .sales-summary .card { min-height: 88px; padding: 12px; }
+      .sales-summary p { font-size: 19px; }
+      .sales-toolbar .form-group { flex-basis: 100%; }
+      .sales-actions { flex-wrap: wrap; }
+      .sales-actions .button { flex: 1 1 calc(50% - 5px); }
     }
 
     @media print {
@@ -199,13 +241,18 @@
     </aside>
 
   <!-- MAIN -->
-  <main class="main">
+  <main class="main sales-page">
 
     <!-- HEADER -->
     <div class="header">
-      <div>
+      <div class="sales-title">
+        <span class="sales-title-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5M8 17h3"/></svg>
+        </span>
+        <div>
         <h2>Sales History</h2>
         <p>Review completed store transactions and sale details.</p>
+        </div>
       </div>
     </div>
 
@@ -221,20 +268,17 @@
 
       <div class="card">
         <h3>Total Sales</h3>
-        <p id="sales-total">₱0.00</p>
+        <p class="sales-summary-total" id="sales-total">₱0.00</p>
       </div>
 
     </div>
 
     <!-- FILTERS -->
-    <div class="table-card">
-
-      <div class="sales-filters">
+    <div class="sales-toolbar">
 
         <div class="form-group">
           <label for="sales-search">Search</label>
           <input
-            class="search-input"
             id="sales-search"
             type="text"
             placeholder="Invoice or cashier..."
@@ -249,6 +293,16 @@
             <option value="GCash">GCash</option>
             <option value="Bank Transfer">Bank Transfer</option>
           </select>
+        </div>
+
+        <div class="form-group">
+          <label for="sales-start-date">From date</label>
+          <input id="sales-start-date" type="date">
+        </div>
+
+        <div class="form-group">
+          <label for="sales-end-date">To date</label>
+          <input id="sales-end-date" type="date">
         </div>
 
         <div class="sales-actions">
@@ -279,16 +333,14 @@
 
         </div>
 
-      </div>
-
     </div>
 
     <!-- SALES TABLE -->
-    <div class="table-card">
+    <div class="table-card sales-table-card">
 
       <div class="table-responsive">
 
-        <table>
+        <table class="sales-table">
 
           <thead>
             <tr>
@@ -437,16 +489,27 @@
 
     const payment =
       document.getElementById('sales-payment').value;
+    const startDate =
+      document.getElementById('sales-start-date').value;
+    const endDate =
+      document.getElementById('sales-end-date').value;
 
-    let filteredSales = sales;
+    const filteredSales = sales.filter(sale => {
+      if (payment && sale.payment_method !== payment) return false;
+      if (!startDate && !endDate) return true;
 
-    if (payment) {
+      const saleDate = new Date(sale.sale_date);
+      if (Number.isNaN(saleDate.getTime())) return false;
 
-      filteredSales = sales.filter(
-        sale => sale.payment_method === payment
-      );
+      const saleDay = [
+        saleDate.getFullYear(),
+        String(saleDate.getMonth() + 1).padStart(2, '0'),
+        String(saleDate.getDate()).padStart(2, '0')
+      ].join('-');
 
-    }
+      return (!startDate || saleDay >= startDate) &&
+        (!endDate || saleDay <= endDate);
+    });
 
 
     // SUMMARY
@@ -494,7 +557,7 @@
 
       row.innerHTML = `
 
-        <td>
+        <td class="sales-invoice">
           <strong>${escapeHTML(sale.invoice_number)}</strong>
         </td>
 
@@ -506,14 +569,14 @@
           ${escapeHTML(sale.cashier || '-')}
         </td>
 
-        <td>
+        <td class="sales-amount">
           <strong>
             ${formatCurrency(sale.total_amount)}
           </strong>
         </td>
 
         <td>
-          ${escapeHTML(sale.payment_method || '-')}
+          <span class="sales-payment">${escapeHTML(sale.payment_method || '-')}</span>
         </td>
 
         <td>
@@ -740,6 +803,14 @@
 
     });
 
+  document
+    .getElementById('sales-start-date')
+    .addEventListener('change', () => renderSales(allSales));
+
+  document
+    .getElementById('sales-end-date')
+    .addEventListener('change', () => renderSales(allSales));
+
 
   /*
    * CLEAR
@@ -751,6 +822,8 @@
       document.getElementById('sales-search').value = '';
 
       document.getElementById('sales-payment').value = '';
+      document.getElementById('sales-start-date').value = '';
+      document.getElementById('sales-end-date').value = '';
 
       loadSales();
 

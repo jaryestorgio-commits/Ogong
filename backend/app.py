@@ -106,6 +106,7 @@ def health():
     required_tables = {'users', 'categories', 'suppliers', 'products', 'sales', 'sale_items'}
     missing_tables = sorted(required_tables - existing_tables)
     if missing_tables:
+      
         app.logger.error('Database schema is missing required tables: %s', ', '.join(missing_tables))
         return jsonify({
             'status': 'error',
