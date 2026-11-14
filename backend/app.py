@@ -595,7 +595,13 @@ def get_sales():
                 sa.sale_date,
                 u.name AS cashier,
                 sa.total_amount,
-                sa.payment_method
+                sa.payment_method,
+                COALESCE((
+                    SELECT STRING_AGG(p.product_name || ' x ' || si.quantity, ', ' ORDER BY si.id)
+                    FROM sale_items si
+                    JOIN products p ON p.id = si.product_id
+                    WHERE si.sale_id = sa.id
+                ), 'No items') AS items
             FROM sales sa
             JOIN users u ON sa.user_id = u.id
         '''

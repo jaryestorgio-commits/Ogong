@@ -55,6 +55,7 @@
     .sales-table th:last-child, .sales-table td:last-child { text-align: right; }
     .sales-table td:first-child { color: #183653; font-weight: 700; }
     .sales-table .recent-sale-amount { color: #059669; font-weight: 800; }
+    .sales-table .recent-sale-items { max-width: 260px; overflow-wrap: anywhere; }
     .low-stock-item { padding: 10px 0; border-bottom: 1px solid #edf2f7; }
     .low-stock-item:last-child { border-bottom: none; }
     .low-stock-line { display: flex; justify-content: space-between; gap: 10px; color: #183653; font-size: 11px; font-weight: 700; }
@@ -698,11 +699,12 @@
         container.innerHTML = `
           <div class="table-responsive">
             <table class="sales-table">
-              <thead><tr><th>Order ID</th><th>Customer Type</th><th>Revenue (₱)</th></tr></thead>
+              <thead><tr><th>Transaction</th><th>Date</th><th>Items</th><th>Total</th></tr></thead>
               <tbody>${recent.map(sale => `
                 <tr>
-                  <td>${sale.invoice_number || `Sale #${sale.id}`}</td>
-                  <td>${sale.customer_type || (sale.sale_date ? new Date(sale.sale_date).toLocaleDateString() : 'Walk-in')}</td>
+                  <td>${escapeDashboardHtml(sale.invoice_number || `Sale #${sale.id}`)}<span class="stock-detail">ID #${escapeDashboardHtml(sale.id)}</span></td>
+                  <td>${sale.sale_date ? escapeDashboardHtml(new Date(sale.sale_date).toLocaleString()) : '—'}</td>
+                  <td class="recent-sale-items">${escapeDashboardHtml(sale.items || 'No items')}</td>
                   <td class="recent-sale-amount">${formatCurrency(sale.total_amount ?? 0)}</td>
                 </tr>
               `).join('')}</tbody>
@@ -713,19 +715,25 @@
 
       } catch (error) {
 
-        console.warn(
-          'Recent sales unavailable:',
-          error
-        );
+        console.error('Recent sales unavailable:', error);
 
         container.innerHTML = `
           <div class="dashboard-empty">
-            Sales information unavailable.
+            Sales information unavailable. <button class="button button-secondary" type="button" onclick="loadRecentSales()">Try again</button>
           </div>
         `;
 
       }
 
+    }
+
+    function escapeDashboardHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
     }
 
     loadDashboard();
