@@ -7,6 +7,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "").strip() or None
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = "postgresql://" + DATABASE_URL[len("postgres://"):]
 DB_CONFIG = {
     "database_url": DATABASE_URL,
     "connect_timeout": 10,

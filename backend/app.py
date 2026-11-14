@@ -8,17 +8,29 @@ from datetime import date, datetime
 from decimal import Decimal
 import psycopg
 from psycopg.rows import dict_row
-from dotenv import load_dotenv
-
-load_dotenv()
-
-DATABASE_URL = os.getenv("DATABASE_URL")
 
 from config import DB_CONFIG, SECRET_KEY
 
 app = Flask(__name__, static_folder='../frontend', static_url_path='')
 app.config['SECRET_KEY'] = SECRET_KEY
-CORS(app)
+allowed_origins = [
+    origin.strip().rstrip('/')
+    for origin in os.environ.get('OGONG_FRONTEND_ORIGINS', '').split(',')
+    if origin.strip()
+]
+if not allowed_origins:
+    allowed_origins = [
+        'https://ogong-1.onrender.com',
+        'http://localhost:5000',
+        'http://127.0.0.1:5000'
+    ]
+CORS(app, resources={
+    r'/api/*': {
+        'origins': allowed_origins,
+        'methods': ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        'allow_headers': ['Content-Type']
+    }
+})
 
 
 def rows_to_list(rows):
@@ -60,6 +72,22 @@ def test_db():
 @app.route('/')
 def root():
     return app.send_static_file('index.html')
+
+
+@app.route('/api/health', methods=['GET'])
+def health():
+    try:
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute('SELECT 1')
+            cursor.fetchone()
+        finally:
+            conn.close()
+    except (psycopg.Error, RuntimeError):
+        app.logger.exception('API health check failed.')
+        return jsonify({'status': 'error', 'database': 'unavailable'}), 503
+    return jsonify({'status': 'ok', 'database': 'connected'})
 
 
 @app.errorhandler(404)

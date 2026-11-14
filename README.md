@@ -67,6 +67,22 @@ The original SQLite database is never modified or removed.
 
 ## Production startup
 
-The included `Procfile` starts the Flask API with Gunicorn. Configure
-`DATABASE_URL` and `OGONG_SECRET_KEY` in the host's environment settings before
-deploying. Do not commit `.env` or production credentials.
+The included `Procfile` starts the Flask API with Gunicorn. For Render, deploy
+the repository root as a Web Service and configure:
+
+- Root Directory: `.`
+- Build command: `pip install -r requirements.txt`
+- Start command: `gunicorn --chdir backend app:app`
+- Health Check Path: `/api/health`
+- `DATABASE_URL`: the Render PostgreSQL connection string (prefer the internal
+  connection string when the services are in the same region)
+- `OGONG_SECRET_KEY`: a unique secret generated in Render's environment settings
+- `OGONG_FRONTEND_ORIGINS`: `https://ogong-1.onrender.com` (no trailing
+  slash). Separate multiple allowed origins with commas.
+
+Deploy `frontend/` as a Render Static Site with Root Directory `frontend`,
+Build Command `echo "No build step"`, and Publish Directory `.`. Its JavaScript
+is configured to call
+`https://pos-system-el4v.onrender.com/api`. The API health check is available
+at `https://pos-system-el4v.onrender.com/api/health` and reports database
+connectivity. Do not commit `.env` or production credentials.

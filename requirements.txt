@@ -1,9 +1,5 @@
 Flask>=2.0
 Flask-Cors>=3.0
-<<<<<<< HEAD
 gunicorn>=20.0
 psycopg[binary]>=3.2
 python-dotenv>=1.0
-=======
-gunicorn
->>>>>>> cc132d7f9d60c84737878d1ed496e1d977f996b7

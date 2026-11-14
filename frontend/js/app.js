@@ -1,5 +1,5 @@
 const isLocalDevelopment = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-const apiBase = isLocalDevelopment ? '/api' : 'https://ogong.onrender.com/api';
+const API_BASE_URL = isLocalDevelopment ? '/api' : 'https://pos-system-el4v.onrender.com/api';
 
 function getStoredUser() {
   return JSON.parse(localStorage.getItem('ogongUser') || 'null');
@@ -14,21 +14,42 @@ function clearStoredUser() {
 }
 
 async function apiFetch(path, options = {}) {
+  const url = `${API_BASE_URL}${path}`;
   let response;
+  let responseText;
   try {
-    response = await fetch(`${apiBase}${path}`, {
+    response = await fetch(url, {
+      ...options,
       headers: {
-        'Content-Type': 'application/json'
-      },
-      ...options
+        ...(options.headers || {}),
+        ...(options.body ? { 'Content-Type': 'application/json' } : {})
+      }
     });
+    responseText = await response.text();
   } catch (error) {
-    console.error(`Request to ${apiBase}${path} failed.`, error);
-    throw new Error(`Cannot reach the Ogong API at ${apiBase}. Please try again later.`);
+    console.error(`Request to ${url} failed.`, error);
+    throw new Error('Unable to reach the Ogong API. Check the API URL, network connection, and CORS configuration.');
   }
-  const data = await response.json().catch(() => ({}));
+
+  let data = null;
+  if (responseText) {
+    try {
+      data = JSON.parse(responseText);
+    } catch (error) {
+      if (response.ok) {
+        console.error(`Ogong API returned invalid JSON for ${url}.`, error);
+        throw new Error(`Ogong API returned an invalid response (${response.status}).`);
+      }
+    }
+  }
   if (!response.ok) {
-    throw new Error(data.message || 'API request failed.');
+    const message = data?.message || `API request failed (${response.status} ${response.statusText}).`;
+    console.error(`Ogong API request failed: ${url} (${response.status}).`, message);
+    throw new Error(message);
+  }
+  if (data === null) {
+    console.error(`Ogong API returned an empty response for ${url} (${response.status}).`);
+    throw new Error(`Ogong API returned an empty response (${response.status}).`);
   }
   return data;
 }
