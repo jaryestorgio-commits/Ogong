@@ -28,7 +28,8 @@ OGONG_SECRET_KEY=<a-unique-random-secret>
 
 The backend loads `.env` for local development. Production hosts such as Render
 should provide `DATABASE_URL` and `OGONG_SECRET_KEY` as environment variables.
-The application does not fall back to SQLite.
+The application does not fall back to SQLite. Application tables use
+PostgreSQL's `public` schema, matching the SQLite migration.
 
 ## Install and run locally
 
@@ -85,4 +86,6 @@ Build Command `echo "No build step"`, and Publish Directory `.`. Its JavaScript
 is configured to call
 `https://pos-system-el4v.onrender.com/api`. The API health check is available
 at `https://pos-system-el4v.onrender.com/api/health` and reports database
-connectivity. Do not commit `.env` or production credentials.
+connectivity and whether the required tables exist. If it reports missing
+tables, run `python backend/init_db.py` with the Render `DATABASE_URL` before
+using the API. Do not commit `.env` or production credentials.

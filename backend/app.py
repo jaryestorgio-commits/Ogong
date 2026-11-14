@@ -9,7 +9,7 @@ from decimal import Decimal
 import psycopg
 from psycopg.rows import dict_row
 
-from config import DB_CONFIG, DB_SCHEMA, SECRET_KEY
+from config import DB_CONFIG, SECRET_KEY
 
 app = Flask(__name__, static_folder='../frontend', static_url_path='')
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -80,14 +80,40 @@ def health():
         conn = get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute('SELECT 1')
-            cursor.fetchone()
+            cursor.execute(
+                "SELECT table_name FROM information_schema.tables "
+                "WHERE table_schema = current_schema() "
+                "AND table_name = ANY(%s)",
+                (['users', 'categories', 'suppliers', 'products', 'sales', 'sale_items'],)
+            )
+            existing_tables = {row['table_name'] for row in cursor.fetchall()}
         finally:
             conn.close()
-    except (psycopg.Error, RuntimeError):
+    except RuntimeError as error:
+        app.logger.error('Database configuration error: %s', error)
+        return jsonify({
+            'status': 'error',
+            'database': 'unavailable',
+            'message': 'DATABASE_URL is not configured.'
+        }), 503
+    except psycopg.Error:
         app.logger.exception('API health check failed.')
-        return jsonify({'status': 'error', 'database': 'unavailable'}), 503
-    return jsonify({'status': 'ok', 'database': 'connected'})
+        return jsonify({
+            'status': 'error',
+            'database': 'unavailable',
+            'message': 'Could not connect to PostgreSQL. Check DATABASE_URL and the Render database status.'
+        }), 503
+    required_tables = {'users', 'categories', 'suppliers', 'products', 'sales', 'sale_items'}
+    missing_tables = sorted(required_tables - existing_tables)
+    if missing_tables:
+        app.logger.error('Database schema is missing required tables: %s', ', '.join(missing_tables))
+        return jsonify({
+            'status': 'error',
+            'database': 'connected',
+            'schema': 'incomplete',
+            'missing_tables': missing_tables
+        }), 503
+    return jsonify({'status': 'ok', 'database': 'connected', 'schema': 'ready'})
 
 
 @app.errorhandler(404)
@@ -104,14 +130,13 @@ def get_connection():
     return psycopg.connect(
         database_url,
         connect_timeout=DB_CONFIG['connect_timeout'],
-        options=f'-c search_path={DB_SCHEMA}',
         row_factory=dict_row
     )
 
 
 @app.errorhandler(psycopg.Error)
 def handle_db_error(error):
-    app.logger.error('PostgreSQL operation failed: %s', error)
+    app.logger.exception('PostgreSQL operation failed (SQLSTATE %s).', error.sqlstate)
     return jsonify({'message': 'Database operation failed. Check PostgreSQL configuration.'}), 500
 
 
