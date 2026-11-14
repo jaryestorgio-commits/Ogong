@@ -58,6 +58,13 @@ and resets identity sequences. It is safe to rerun against the same target:
 rows with existing IDs are not duplicated or overwritten, and conflicting
 records fail verification instead of being silently changed.
 
+To migrate only the existing ADMIN and STAFF accounts, preserving their IDs and
+passwords:
+
+```bash
+python backend/migrate_sqlite_to_postgres.py --users-only
+```
+
 To use another SQLite file:
 
 ```bash
@@ -73,7 +80,7 @@ the repository root as a Web Service and configure:
 
 - Root Directory: `.`
 - Build command: `pip install -r requirements.txt`
-- Start command: `gunicorn --chdir backend app:app`
+- Start command: `python backend/init_db.py && gunicorn --chdir backend app:app`
 - Health Check Path: `/api/health`
 - `DATABASE_URL`: the Render PostgreSQL connection string (prefer the internal
   connection string when the services are in the same region)

@@ -138,8 +138,8 @@ def verify_foreign_keys(conn):
             )
 
 
-def reset_sequences(conn):
-    for table in TABLES:
+def reset_sequences(conn, tables=TABLES):
+    for table in tables:
         conn.execute(
             sql.SQL(
                 "SELECT setval(pg_get_serial_sequence(%s, 'id'), "
@@ -162,12 +162,19 @@ def reset_sequences(conn):
             raise RuntimeError(f"Identity sequence verification failed for {table}.")
 
 
-def migrate(sqlite_path: Path, backup_dir: Path, database_url: str | None = None):
+def migrate(
+    sqlite_path: Path,
+    backup_dir: Path,
+    database_url: str | None = None,
+    tables: tuple[str, ...] = TABLES,
+):
     connection_url = database_url or DB_CONFIG["database_url"]
     if not connection_url:
         raise RuntimeError("Set DATABASE_URL before running the migration.")
     if not sqlite_path.is_file():
         raise FileNotFoundError(f"SQLite database not found: {sqlite_path}")
+    if not tables or any(table not in TABLES for table in tables):
+        raise ValueError("Migration tables must be selected from the known table list.")
 
     backup_path = create_sqlite_backup(sqlite_path, backup_dir)
     print(f"SQLite backup created at: {backup_path}")
@@ -180,10 +187,11 @@ def migrate(sqlite_path: Path, backup_dir: Path, database_url: str | None = None
             row_factory=dict_row,
         ) as target:
             apply_schema(target)
-            for table in TABLES:
+            for table in tables:
                 copied_counts[table] = copy_table(source, target, table)
-            reset_sequences(target)
-            verify_foreign_keys(target)
+            reset_sequences(target, tables)
+            if tables == TABLES:
+                verify_foreign_keys(target)
 
             for table, source_count in copied_counts.items():
                 target_count = target.execute(
@@ -209,8 +217,14 @@ def main():
         default=DEFAULT_BACKUP_DIR,
         help="Directory for the pre-migration SQLite backup.",
     )
+    parser.add_argument(
+        "--users-only",
+        action="store_true",
+        help="Migrate only existing ADMIN and STAFF user accounts.",
+    )
     args = parser.parse_args()
-    migrate(args.sqlite.resolve(), args.backup_dir.resolve())
+    tables = ("users",) if args.users_only else TABLES
+    migrate(args.sqlite.resolve(), args.backup_dir.resolve(), tables=tables)
 
 
 if __name__ == "__main__":
